@@ -1,14 +1,20 @@
 import secrets
+import os
 
 from flask import Flask, json, render_template
+from dotenv import load_dotenv
 
+from myapp.db.supabase_postgres_manager import SupabasePostgresManager
 
 def create_app(env="development"):
+    load_dotenv()
     app = Flask(__name__)
     app.secret_key = secrets.token_hex(16)  # This is necessary for flash!
     app.config.from_file(f"{env}.json", load=json.load)
     app.config.from_prefixed_env()
     app.app_context().push()
+
+    db_manager = SupabasePostgresManager( os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY"))
 
     @app.route("/")
     def home():
@@ -16,6 +22,7 @@ def create_app(env="development"):
     
     @app.route("/categories")
     def categories():
-        return render_template("categories.html")
+        categories = db_manager.get_categories()
+        return render_template("categories.html", categories=categories)
     
     return app
