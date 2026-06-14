@@ -1,0 +1,7 @@
+{
+ "DEBUG":true,
+ "DBHOST": "10.172.13.10",
+ "DBPORT": 5432,
+ "DBNAME": "games",
+ "DBUSER": "naf"
+}
