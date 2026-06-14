@@ -67,6 +67,21 @@ def create_app(env="development"):
 
         return render_template("login.html")
     
+    @app.route("/signup", methods=["GET", "POST"])
+    def signup():
+        if request.method == "POST":
+            email = request.form.get("email")
+            password = request.form.get("password")
+            name = request.form.get("name")
+            try:
+                db_manager.signup(email, password, name)
+                db_manager.login(email, password)
+                flash("Signup successful, please log in")
+            except ManagerException:
+                flash("Signup failed")
+
+        return render_template("signup.html")
+    
     @app.route("/profile", methods=["GET"])
     def profile():
         return render_template("profile.html", user = current_user)

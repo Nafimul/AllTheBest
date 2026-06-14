@@ -33,6 +33,20 @@ class SupabasePostgresManager:
         if (response.status_code != 201):
             raise ManagerException("Failed to add category")
     
+    def signup(self, email, password, name):
+        response = self.supabase.auth.sign_up({
+            "email": email,
+            "password": password
+        })
+        data = response.model_dump()
+
+        self.supabase.table("profiles").insert({
+            "user_id": data['user']['id'],
+            "name": name
+        }).execute()
+
+        return response
+    
     def login(self, email, password):
         response = self.supabase.auth.sign_in_with_password({
             "email": email,
