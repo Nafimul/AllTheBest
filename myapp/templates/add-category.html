@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+{% block title %}Categories{% endblock %}
+{% block content %}
+    <h1>Add Category</h1>
+    <form method="POST" action="/api/category">
+        <label for="name"> Name </label>
+        <input id="name" name="name">
+    </form>
+    <button type="submit"> Add </button>
+{% endblock %}

@@ -1,9 +1,10 @@
 import secrets
 import os
 
-from flask import Flask, json, render_template
+from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
 
+from myapp.db.manager_exception import ManagerException
 from myapp.db.supabase_postgres_manager import SupabasePostgresManager
 
 def create_app(env="development"):
@@ -24,5 +25,18 @@ def create_app(env="development"):
     def categories():
         categories = db_manager.get_categories()
         return render_template("categories.html", categories=categories)
+    
+    @app.route("/add-category")
+    def add_category():
+        return render_template("add-category.html")
+    
+    @app.route("/category", methods=["POST"])
+    def add_category():
+        try:
+            db_manager.add_category(name=request.form["name"])
+            flash("Category added successfully")
+        except ManagerException as e:
+            flash("Failed to add category")
+        return render_template("add-category.html")
     
     return app
