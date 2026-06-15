@@ -4,7 +4,8 @@ import os
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
 
-from myapp.db.manager_exception import ManagerException
+from myapp.errors.db_state_error import DbStateError
+from myapp.errors.server_error import ServerError
 from flask_login import current_user, login_required, login_user, logout_user, LoginManager
 from myapp.db.supabase_postgres_manager import SupabasePostgresManager
 
@@ -25,7 +26,6 @@ def create_app(env="development"):
 
     @app.route("/")
     def home():
-        # return [current_user.id, current_user.is_authenticated, current_user.email]
         return render_template("home.html")
     
     @login_manager.user_loader
@@ -35,8 +35,11 @@ def create_app(env="development"):
     
     @app.route("/categories")
     def categories():
-        categories = db_manager.get_categories()
-        return render_template("categories.html", categories=categories)
+        try:
+            categories = db_manager.get_categories()
+            return render_template("categories.html", categories=categories)
+        except ServerError:
+            return render_template("server-error.html")
     
     @app.route("/add-category")
     def add_category_form():
@@ -47,40 +50,48 @@ def create_app(env="development"):
         try:
             db_manager.add_category(name=request.form["name"])
             flash("Category added successfully")
-        except ManagerException as e:
-            flash("Failed to add category")
+        except DbStateError as e:
+            flash("Already exists")
+        except ServerError:
+            return render_template("server-error.html")
         return render_template("add-category.html")
     
     @app.route("/login", methods=["GET", "POST"])
     def login():
-        if request.method == "POST":
-            email = request.form.get("email")
-            password = request.form.get("password")
-            try:
-                user = db_manager.login(email, password)
-                login_user(user)
-                flash("Logged in successfully")
-                return render_template("home.html")
-            except ManagerException:
-                flash("Invalid email or password")
-                return render_template("login.html")
-
-        return render_template("login.html")
+        try:
+            if request.method == "POST":
+                email = request.form.get("email")
+                password = request.form.get("password")
+                try:
+                    user = db_manager.login(email, password)
+                    login_user(user)
+                    flash("Logged in successfully")
+                    return render_template("home.html")
+                except ServerError:
+                    flash("Invalid email or password")
+                    return render_template("login.html")
+                
+            return render_template("login.html")
+        except ServerError:
+            return render_template("server-error.html")
     
     @app.route("/signup", methods=["GET", "POST"])
     def signup():
-        if request.method == "POST":
-            email = request.form.get("email")
-            password = request.form.get("password")
-            name = request.form.get("name")
-            try:
-                db_manager.signup(email, password, name)
-                db_manager.login(email, password)
-                flash("Signup successful, please log in")
-            except ManagerException:
-                flash("Signup failed")
+        try:
+            if request.method == "POST":
+                email = request.form.get("email")
+                password = request.form.get("password")
+                name = request.form.get("name")
+                try:
+                    db_manager.signup(email, password, name)
+                    db_manager.login(email, password)
+                    flash("Signup successful, please log in")
+                except ServerError:
+                    flash("Signup failed")
 
-        return render_template("signup.html")
+            return render_template("signup.html")
+        except ServerError:
+            return render_template("server-error.html")
     
     @app.route("/profile", methods=["GET"])
     def profile():
