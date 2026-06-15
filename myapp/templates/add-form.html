@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+{% block title %}Add Category{% endblock %}
+{% block file_links %}
+    <script type='text/javascript' src='{{ url_for("static", filename="scripts/add-form.js") }}'></script>
+{% endblock %}
+{% block content %}
+    <h2 id="successMessage"></h2>
+    <form method="POST" id="addForm">
+        <h2> Add both a thing and a Category at once to submit a vote </h2>
+        <h3> Thing </h3>
+        <label for="thingName"> Name </label>
+        <input id="thingName" name="thingName" type="text" placeholder="Spider-Man">
+
+        <label for="fromThingName"> From </label>
+        <input id="fromThingName" name="fromThingName" type="text" placeholder="Marvel">
+
+        <label for="thingSpoilerFor"> This thing is a spoiler for (if applicable): </label>
+        <input id="thingSpoilerFor" name="thingSpoilerFor" type="text" placeholder="Spider-Man 3">
+
+        <label for="thingImage"> Image </label>
+        <input id="thingImage" name="thingImage" type="file" accept="image/*">
+        <img id="imagePreview" alt="Image preview will appear here">
+        
+        <button type="submit"> Add </button>
+    </form>
+{% endblock %}

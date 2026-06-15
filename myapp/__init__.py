@@ -9,6 +9,7 @@ from myapp.errors.server_error import ServerError
 from flask_login import current_user, login_required, login_user, logout_user, LoginManager
 from myapp.db.supabase_postgres_manager import SupabasePostgresManager
 from myapp.models.category import Category
+from myapp.models.thing import Thing
 
 def create_app(env="development"):
     load_dotenv()
@@ -46,20 +47,43 @@ def create_app(env="development"):
         except ServerError:
             return render_template("server-error.html")
     
-    @app.route("/add-category")
-    @login_required
-    def add_category_form():
-        return render_template("add-category.html")
+    @app.route("/add-form")
+    # @login_required
+    def add__form():
+        return render_template("add-form.html")
     
     @app.route("/api/category", methods=["POST"])
-    @login_required
+    # @login_required
     def add_category():
-        if request.form["name"]:
-            category = Category(name=request.form["name"])
-        else:
+        if not request.form.get("categoryName"):
             return {"message": "Missing parameters"}, 400
+        
         try:
+            category = Category(
+                name=request.form.get("categoryName"),
+                is_spoiler=request.form.get("categoryIsSpoiler")
+            )
             db_manager.add_category(category)
+            return {"message": "Successfully added!"}, 200
+        except DbStateError as e:
+            return {"message": "Already exists"}, 400
+        except ServerError:
+            return {"message": "Server error"}, 500
+        
+    @app.route("/api/thing", methods=["POST"])
+    # @login_required
+    def add_thing():
+        if not request.form.get("thingName"):
+            return {"message": "Missing parameters"}, 400
+        
+        try:
+            image_url = db_manager.add_thing_image(request.files.get('thingImage'))
+            thing = Thing(
+                    name=request.form.get("thingName"),
+                    from_thing_id=db_manager.get_thing_by_name(request.form.get("fromThingName")).id if request.form.get("fromThing") else None,
+                    image_url=image_url
+                )
+            db_manager.add_thing(thing)
             return {"message": "Successfully added!"}, 200
         except DbStateError as e:
             return {"message": "Already exists"}, 400

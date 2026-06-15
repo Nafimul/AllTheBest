@@ -1,10 +1,13 @@
 from postgrest import APIError
+import storage3
 from supabase import create_client, Client
 from myapp.errors.auth_error import AuthError
 from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
+from myapp.models.thing import Thing
 from myapp.user import User
+import uuid
 
 class SupabasePostgresManager:
     def __init__(self, url, key):
@@ -37,9 +40,50 @@ class SupabasePostgresManager:
             self.supabase.table('categories').insert({"name": category.name}).execute()
             return True
         except APIError as e:
-            print("code aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:" + e.code)
             if self.is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
+            raise ServerError("server error", e.code)
+        
+    def get_thing_by_name(self, name: str):
+        try:
+            response = self.supabase.table('things').select("*").filter("name", "eq", name).execute()
+        except APIError as e:
+            raise ServerError("server error", e.code)
+        if not response.data or not response.data[0]:
+            raise DbStateError("Thing not found", 404)
+        
+        thing_data = response.data[0]
+        thing = Thing(
+            id=thing_data['id'],
+            created_at=thing_data['created_at'],
+            name=thing_data['name'],
+            is_spoiler=thing_data['is_spoiler'],
+            image_url=thing_data['image_url'],
+            from_thing_id=thing_data['from_thing_id']
+        )
+        return thing
+        
+    def add_thing(self, thing: Thing):
+        try:
+            self.supabase.table('things').insert({
+                "name": thing.name, 
+                "image_url": thing.image_url, 
+                "from_thing_id": thing.from_thing_id
+                }).execute()
+            return True
+        except APIError as e:
+            if self.is_client_error(e.code):
+                raise DbStateError("That thing already exists", e.code)
+            raise ServerError("server error", e.code)
+        
+    def add_thing_image(self, image_file):
+        try:
+            new_file_name = f"{image_file.filename}-{uuid.uuid4()}" #to avoid name conflicts in storage
+            response = self.supabase.storage.from_('ThingImages').upload(f"{new_file_name}", image_file.read(), 
+                                                                         {"content-type": image_file.content_type})
+            image_url = self.supabase.storage.from_('ThingImages').get_public_url(f"{new_file_name}")
+            return image_url
+        except (APIError, storage3.exceptions.StorageApiError) as e:
             raise ServerError("server error", e.code)
     
     def signup(self, email, password, name):
