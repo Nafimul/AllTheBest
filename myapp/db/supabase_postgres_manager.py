@@ -12,6 +12,11 @@ class SupabasePostgresManager:
             url, key
         )
 
+    def is_client_error(self, error : str):
+            last_three = error[-3:]
+            code_int = int(last_three)
+            return 400 <= code_int <= 499
+
     def get_categories(self):
         try:
             response = self.supabase.table('categories').select("*").execute()
@@ -27,12 +32,13 @@ class SupabasePostgresManager:
             categories.append(category)
         return categories
     
-    def add_category(self, category: Category, user_id: int):
+    def add_category(self, category: Category):
         try:
-            self.supabase.table('categories').insert({"name": category.name, "user_id": user_id}).execute()
+            self.supabase.table('categories').insert({"name": category.name}).execute()
             return True
         except APIError as e:
-            if e.code >= 400 and e.code <= 499:
+            print("code aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa:" + e.code)
+            if self.is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
             raise ServerError("server error", e.code)
     
@@ -49,7 +55,7 @@ class SupabasePostgresManager:
             })
             return True
         except APIError as e:
-            if e.code >= 400 and e.code <= 499:
+            if self.is_client_error(e.code):
                 raise DbStateError("email or name already in use", e.code)
             raise ServerError("server error", e.code)
         
@@ -69,7 +75,7 @@ class SupabasePostgresManager:
             user.name = response.data[0]['name']
             return user
         except APIError as e:
-            if e.code >= 400 and e.code <= 499:
+            if self.is_client_error(e.code):
                 raise AuthError("Invalid email or password", e.code)
             raise ServerError("server error", e.code)
     

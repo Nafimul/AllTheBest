@@ -6,6 +6,8 @@
         {% block file_links %}{% endblock %}
     </head>
     <body>
+        <h1> {% block title %}{% endblock %} </h1>
+
         {% for message in get_flashed_messages() %}
             <div id="flash">
                 {{ message }}

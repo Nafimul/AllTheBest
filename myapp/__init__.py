@@ -8,6 +8,7 @@ from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
 from flask_login import current_user, login_required, login_user, logout_user, LoginManager
 from myapp.db.supabase_postgres_manager import SupabasePostgresManager
+from myapp.models.category import Category
 
 def create_app(env="development"):
     load_dotenv()
@@ -26,6 +27,10 @@ def create_app(env="development"):
 
     @app.route("/")
     def home():
+        if (os.environ.get("EMAIL")):
+            user = db_manager.login(os.environ.get("EMAIL"), os.environ.get("PASSWORD"))
+            login_user(user)
+
         return render_template("home.html")
     
     @login_manager.user_loader
@@ -42,20 +47,25 @@ def create_app(env="development"):
             return render_template("server-error.html")
     
     @app.route("/add-category")
+    @login_required
     def add_category_form():
         return render_template("add-category.html")
     
-    @app.route("/category", methods=["POST"])
+    @app.route("/api/category", methods=["POST"])
+    @login_required
     def add_category():
+        if request.form["name"]:
+            category = Category(name=request.form["name"])
+        else:
+            return {"message": "Missing parameters"}, 400
         try:
-            db_manager.add_category(name=request.form["name"])
-            flash("Category added successfully")
+            db_manager.add_category(category)
+            return {"message": "Successfully added!"}, 200
         except DbStateError as e:
-            flash("Already exists")
+            return {"message": "Already exists"}, 400
         except ServerError:
-            return render_template("server-error.html")
-        return render_template("add-category.html")
-    
+            return {"message": "Server error"}, 500
+
     @app.route("/login", methods=["GET", "POST"])
     def login():
         try:
