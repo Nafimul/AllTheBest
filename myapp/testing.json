@@ -1,7 +1,4 @@
 {
- "TESTING":true,
- "DBHOST": "10.172.13.10",
- "DBPORT": 5432,
- "DBNAME": "test_games",
- "DBUSER": "naf"
+ "SUPABASEURL":"should be in .env",
+ "SUPABASEKEY":"should be in .env"
 }
