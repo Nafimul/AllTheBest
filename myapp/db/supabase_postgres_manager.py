@@ -114,7 +114,7 @@ class SupabasePostgresManager:
     
     def signup(self, email, password, name):
         try:
-            self.supabase.auth.sign_up({
+            response = self.supabase.auth.sign_up({
                 "email": email,
                 "password": password,
                 "options": {
