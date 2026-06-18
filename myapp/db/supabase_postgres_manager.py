@@ -47,31 +47,55 @@ class SupabasePostgresManager:
             return Thing.from_json(response.data[0])
         except APIError as e:
             raise ServerError("server error", e.code)
-        if not response.data or not response.data[0]:
-            raise DbStateError("Thing not found", 404)
+    
+    # def update_thing(self, thing: Thing):
+    #     try:
+    #         if self.get_thing_by_id(thing.from_thing_id) is None:
+    #             raise DbStateError("from thing not found", 404)
+    #         if self.get_thing(thing.name) is None:
+    #             raise DbStateError("thing with that name not found", 404)
+    #         if thing.from_thing_name is not None and self.get_thing(thing.from_thing_name) is None:
+    #             raise DbStateError("from thing not found", 404)
+            
+    #         response = self.supabase.table('things').update({
+    #             "image_url": thing.image_url, 
+    #             "from_thing_name": thing.from_thing_name
+    #             }).eq("name", thing.name).execute()
+            
+    #         return Thing.from_json(response.data[0])
+    #     except APIError as e:
+    #         raise ServerError("server error", e.code)
         
-        thing_data = response.data[0]
-        thing = Thing(
-            id=thing_data['id'],
-            created_at=thing_data['created_at'],
-            name=thing_data['name'],
-            is_spoiler=thing_data['is_spoiler'],
-            image_url=thing_data['image_url'],
-            from_thing_id=thing_data['from_thing_id']
-        )
-        return thing
+    # def add_thing(self, thing: Thing):
+    #     try:
+    #         if self.get_thing(thing.name) is not None:
+    #             raise DbStateError("That thing already exists")
+    #         if thing.from_thing_name is not None and self.get_thing(thing.from_thing_name) is None:
+    #             raise DbStateError("from thing not found", 404)
+            
+    #         response = self.supabase.table('things').insert({
+    #             "name": thing.name, 
+    #             "image_url": thing.image_url, 
+    #             "from_thing_id": thing.from_thing_id
+    #             }).execute()
+            
+    #         return Thing.from_json(response.data[0])
+    #     except APIError as e:
+    #         raise ServerError("server error", e.code)
         
-    def add_thing(self, thing: Thing):
+    def upsert_thing(self, thing: Thing):
         try:
-            self.supabase.table('things').insert({
+            if thing.from_thing_name is not None and self.get_thing(thing.from_thing_name) is None:
+                raise DbStateError("from thing not found", 404)
+            
+            response = self.supabase.table('things').upsert({
                 "name": thing.name, 
-                "image_url": thing.image_url, 
-                "from_thing_id": thing.from_thing_id
+                "img_filename": thing.img_filename, 
+                "from_thing_name": thing.from_thing_name
                 }).execute()
-            return True
+            
+            return Thing.from_json(response.data[0])
         except APIError as e:
-            if self.is_client_error(e.code):
-                raise DbStateError("That thing already exists", e.code)
             raise ServerError("server error", e.code)
         
     def add_thing_image(self, image_file):
