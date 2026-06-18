@@ -98,15 +98,19 @@ class SupabasePostgresManager:
         except APIError as e:
             raise ServerError("server error", e.code)
         
-    def add_thing_image(self, image_file):
+    def add_image(self, img_file):
         try:
-            new_file_name = f"{image_file.filename}-{uuid.uuid4()}" #to avoid name conflicts in storage
-            response = self.supabase.storage.from_('ThingImages').upload(f"{new_file_name}", image_file.read(), 
-                                                                         {"content-type": image_file.content_type})
-            image_url = self.supabase.storage.from_('ThingImages').get_public_url(f"{new_file_name}")
-            return image_url
+            self.supabase.storage.from_('ThingImages').upload(f"{img_file.filename}", img_file.read(), 
+                                                                         {"content-type": img_file.content_type})
         except (APIError, storage3.exceptions.StorageApiError) as e:
             raise ServerError("server error", e.code)
+        
+    # def get_img_url(self, img_filename):
+    #     try:
+    #         image_url = self.supabase.storage.from_('ThingImages').get_public_url(f"{img_filename}")
+    #         return image_url
+    #     except (APIError, storage3.exceptions.StorageApiError) as e:
+    #         raise ServerError("server error", e.code)
     
     def signup(self, email, password, name):
         try:
