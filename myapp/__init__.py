@@ -17,10 +17,6 @@ from flask_login import (
     logout_user,
     LoginManager,
 )
-from myapp.db.supabase_postgres_manager import (
-    SupabasePostgresManager,
-    SupabaseUserManager,
-)
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 
