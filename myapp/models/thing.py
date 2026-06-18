@@ -27,19 +27,19 @@ class Thing:
 
     def from_json(json):
         thing = Thing(
-            created_at=json['created_at'],
-            name=json['name'],
-            from_thing_name=json['from_thing_name'],
-            img_filename=json['img_filename']
+            created_at=json["created_at"],
+            name=json["name"],
+            from_thing_name=json["from_thing_name"],
+            img_filename=json["img_filename"],
         )
         return thing
-    
+
     def from_request(request, img_filename=None):
         if not request.form.get("thingName"):
             raise ValueError()
-        
+
         return Thing(
-                    name=request.form.get("thingName"),
-                    from_thing_name=request.form.get("fromThingName"),
-                    img_filename=img_filename
-                )
+            name=request.form.get("thingName"),
+            from_thing_name=request.form.get("fromThingName"),
+            img_filename=img_filename,
+        )
