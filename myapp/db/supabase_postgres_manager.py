@@ -28,12 +28,7 @@ class SupabasePostgresManager:
             raise ServerError("server error", e.code)
         categories = []
         for item in response.data:
-            category = Category(
-                id=item['id'],
-                created_at=item['created_at'],
-                name=item['name']
-            )
-            categories.append(category)
+            categories.append(Category.from_json(item))
         return categories
     
     def add_category(self, category: Category):
@@ -43,10 +38,13 @@ class SupabasePostgresManager:
             if self.is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
             raise ServerError("server error", e.code)
-        
-    def get_thing_by_name(self, name: str):
+    
+    def get_thing(self, name: str):
         try:
             response = self.supabase.table('things').select("*").filter("name", "eq", name).execute()
+            if len(response.data) == 0:
+                return None
+            return Thing.from_json(response.data[0])
         except APIError as e:
             raise ServerError("server error", e.code)
         if not response.data or not response.data[0]:
@@ -111,13 +109,9 @@ class SupabasePostgresManager:
                 "email": email,
                 "password": password
             })
-            data = response.model_dump()
 
-            user = User()
-            user.id = data['user']['id']
-            user.email = data['user']['email']
-            
-            response = self.supabase.table('profiles').select("*").filter("user_id", "eq", data['user']['id']).execute()
+            data = response.model_dump()
+            return User.from_supabase_row_json(data['user'])
         except AuthError as e:
             raise AuthenticationError("Invalid email or password", e.code)
         except APIError as e:
@@ -128,15 +122,9 @@ class SupabasePostgresManager:
             response = self.supabase.auth.get_user()
             if response is None or response.user is None:
                 return None
-            data = response.model_dump()
             
-            user = User()
-            user.id = data['user']['id']
-            user.email = data['user']['email']
-
-            response = self.supabase.table('profiles').select("*").filter("user_id", "eq", data['user']['id']).execute()
-            user.name = response.data[0]['name']
-            return user
+            data = response.model_dump()
+            return User.from_supabase_row_json(data['user'])
         except APIError as e:
             raise ServerError("server error", e.code)
 
