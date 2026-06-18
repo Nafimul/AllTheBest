@@ -6,6 +6,7 @@ from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
 
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
+from myapp.db.supabase_user_manager import SupabaseUserManager
 from myapp.db.supabase_thing_manager import SupabaseThingManager
 from myapp.errors.authentication_error import AuthenticationError
 from myapp.errors.db_state_error import DbStateError
