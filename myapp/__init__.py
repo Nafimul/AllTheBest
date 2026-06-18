@@ -5,6 +5,8 @@ import uuid
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
 
+from myapp.db.supabase_category_manager import SupabaseCategoryManager
+from myapp.db.supabase_thing_manager import SupabaseThingManager
 from myapp.errors.authentication_error import AuthenticationError
 from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
@@ -15,7 +17,10 @@ from flask_login import (
     logout_user,
     LoginManager,
 )
-from myapp.db.supabase_postgres_manager import SupabasePostgresManager
+from myapp.db.supabase_postgres_manager import (
+    SupabasePostgresManager,
+    SupabaseUserManager,
+)
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 
@@ -33,27 +38,35 @@ def create_app(env="development"):
     login_manager.login_view = "login"
     login_manager.login_message = "You must be logged in to do that."
 
-    db_manager = SupabasePostgresManager(
+    user_manager = SupabaseUserManager(
+        os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
+    )
+    thing_manager = SupabaseThingManager(
+        os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
+    )
+    category_manager = SupabaseCategoryManager(
         os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
     )
 
     @app.route("/")
     def home():
         if os.environ.get("EMAIL"):
-            user = db_manager.login(os.environ.get("EMAIL"), os.environ.get("PASSWORD"))
+            user = user_manager.login(
+                os.environ.get("EMAIL"), os.environ.get("PASSWORD")
+            )
             login_user(user)
 
         return render_template("home.html")
 
     @login_manager.user_loader
     def user_loader(id):
-        user = db_manager.get_user()
+        user = user_manager.get_user()
         return user
 
     @app.route("/categories")
     def categories():
         try:
-            categories = db_manager.get_categories()
+            categories = category_manager.get_categories()
             return render_template("categories.html", categories=categories)
         except ServerError:
             return render_template("server-error.html")
@@ -75,7 +88,7 @@ def create_app(env="development"):
                 is_spoiler=request.form.get("categoryIsSpoiler"),
                 desc=request.form.get("categoryDesc"),
             )
-            db_manager.add_category(category)
+            category_manager.add_category(category)
             return {"message": "Successfully added!"}, 200
         except DbStateError as e:
             return {"message": "Already exists"}, 400
@@ -95,10 +108,10 @@ def create_app(env="development"):
                     uuid.uuid4()
                 )  # to avoid name conflicts in storage
                 img_filename = img_file.filename
-                db_manager.add_image(img_file)
+                thing_manager.add_image(img_file)
 
             thing = Thing.from_request(request, img_filename=img_filename)
-            db_manager.upsert_thing(thing)
+            thing_manager.upsert_thing(thing)
             return {"message": "Success!"}, 200
         except ServerError:
             return {"message": "Server error"}, 500
@@ -110,7 +123,7 @@ def create_app(env="development"):
                 email = request.form.get("email")
                 password = request.form.get("password")
                 try:
-                    user = db_manager.login(email, password)
+                    user = user_manager.login(email, password)
                     login_user(user)
                     flash("Logged in successfully")
                     return render_template("home.html")
@@ -131,8 +144,8 @@ def create_app(env="development"):
             email = request.form.get("email")
             password = request.form.get("password")
             name = request.form.get("name")
-            db_manager.signup(email, password, name)
-            db_manager.login(email, password)
+            user_manager.signup(email, password, name)
+            user_manager.login(email, password)
             flash("Signup successful. You are now logged in.")
             return render_template("signup.html")
         except AuthenticationError:
