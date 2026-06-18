@@ -1,9 +1,11 @@
 import secrets
 import os
+import uuid
 
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
 
+from myapp.errors.authentication_error import AuthenticationError
 from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
 from flask_login import current_user, login_required, login_user, logout_user, LoginManager
@@ -61,7 +63,8 @@ def create_app(env="development"):
         try:
             category = Category(
                 name=request.form.get("categoryName"),
-                is_spoiler=request.form.get("categoryIsSpoiler")
+                is_spoiler=request.form.get("categoryIsSpoiler"),
+                desc=request.form.get("categoryDesc")
             )
             db_manager.add_category(category)
             return {"message": "Successfully added!"}, 200
@@ -72,23 +75,22 @@ def create_app(env="development"):
         
     @app.route("/api/thing", methods=["POST"])
     # @login_required
-    def add_thing():
+    def upsert_thing():
         if not request.form.get("thingName"):
             return {"message": "Missing parameters"}, 400
-        
-        try:
-            image_url = db_manager.add_thing_image(request.files.get('thingImage'))
-            thing = Thing(
-                    name=request.form.get("thingName"),
-                    from_thing_id=db_manager.get_thing_by_name(request.form.get("fromThingName")).id if request.form.get("fromThing") else None,
-                    image_url=image_url
-                )
-            db_manager.add_thing(thing)
-            return {"message": "Successfully added!"}, 200
-        except DbStateError as e:
-            return {"message": "Already exists"}, 400
-        except ServerError:
-            return {"message": "Server error"}, 500
+        # try:
+        img_file = request.files.get('thingImage')
+        img_filename = None
+        if img_file:
+            img_file.filename += str(uuid.uuid4()) #to avoid name conflicts in storage
+            img_filename = img_file.filename
+            db_manager.add_image(img_file)
+
+        thing = Thing.from_request(request, img_filename=img_filename)
+        db_manager.upsert_thing(thing)
+        return {"message": "Success!"}, 200
+        # except ServerError:
+        #     return {"message": "Server error"}, 500
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
@@ -108,24 +110,29 @@ def create_app(env="development"):
             return render_template("login.html")
         except ServerError:
             return render_template("server-error.html")
+        except AuthenticationError:
+            flash("invalid email or pass")
+            return render_template("login.html")
     
-    @app.route("/signup", methods=["GET", "POST"])
+    @app.route("/signup", methods=["POST"])
     def signup():
         try:
-            if request.method == "POST":
-                email = request.form.get("email")
-                password = request.form.get("password")
-                name = request.form.get("name")
-                try:
-                    db_manager.signup(email, password, name)
-                    db_manager.login(email, password)
-                    flash("Signup successful, please log in")
-                except ServerError:
-                    flash("Signup failed")
-
+            email = request.form.get("email")
+            password = request.form.get("password")
+            name = request.form.get("name")
+            db_manager.signup(email, password, name)
+            db_manager.login(email, password)
+            flash("Signup successful. You are now logged in.")
+            return render_template("signup.html")
+        except AuthenticationError:
+            flash("email or name taken")
             return render_template("signup.html")
         except ServerError:
             return render_template("server-error.html")
+        
+    @app.route("/signup", methods=["GET"])
+    def signup_form():
+        return render_template("signup.html")
     
     @app.route("/profile", methods=["GET"])
     def profile():
