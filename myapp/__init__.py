@@ -78,19 +78,19 @@ def create_app(env="development"):
     def upsert_thing():
         if not request.form.get("thingName"):
             return {"message": "Missing parameters"}, 400
-        # try:
-        img_file = request.files.get('thingImage')
-        img_filename = None
-        if img_file:
-            img_file.filename += str(uuid.uuid4()) #to avoid name conflicts in storage
-            img_filename = img_file.filename
-            db_manager.add_image(img_file)
+        try:
+            img_file = request.files.get('thingImage')
+            img_filename = None
+            if img_file:
+                img_file.filename += str(uuid.uuid4()) #to avoid name conflicts in storage
+                img_filename = img_file.filename
+                db_manager.add_image(img_file)
 
-        thing = Thing.from_request(request, img_filename=img_filename)
-        db_manager.upsert_thing(thing)
-        return {"message": "Success!"}, 200
-        # except ServerError:
-        #     return {"message": "Server error"}, 500
+            thing = Thing.from_request(request, img_filename=img_filename)
+            db_manager.upsert_thing(thing)
+            return {"message": "Success!"}, 200
+        except ServerError:
+            return {"message": "Server error"}, 500
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
