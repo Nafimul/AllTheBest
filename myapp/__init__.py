@@ -47,10 +47,10 @@ def create_app(env="development"):
         except ServerError:
             return render_template("server-error.html")
     
-    @app.route("/add-form")
+    @app.route("/vote-form")
     # @login_required
-    def add__form():
-        return render_template("add-form.html")
+    def vote_form():
+        return render_template("vote-form.html")
     
     @app.route("/api/category", methods=["POST"])
     # @login_required
