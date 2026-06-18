@@ -1,7 +1,8 @@
 from postgrest import APIError
 import storage3
-from supabase import create_client, Client
-from myapp.errors.auth_error import AuthError
+from supabase import AuthError, create_client, Client
+import supabase_auth
+from myapp.errors.authentication_error import AuthenticationError
 from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
@@ -38,7 +39,6 @@ class SupabasePostgresManager:
     def add_category(self, category: Category):
         try:
             self.supabase.table('categories').insert({"name": category.name}).execute()
-            return True
         except APIError as e:
             if self.is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
@@ -97,10 +97,12 @@ class SupabasePostgresManager:
                     }
                 }
             })
-            return True
+            
+            data = response.model_dump()
+            return User.from_supabase_row_json(data['user'])
+        except AuthError as e:
+            raise AuthenticationError("email or name already in use", e.code)
         except APIError as e:
-            if self.is_client_error(e.code):
-                raise DbStateError("email or name already in use", e.code)
             raise ServerError("server error", e.code)
         
     def login(self, email, password):
@@ -116,11 +118,9 @@ class SupabasePostgresManager:
             user.email = data['user']['email']
             
             response = self.supabase.table('profiles').select("*").filter("user_id", "eq", data['user']['id']).execute()
-            user.name = response.data[0]['name']
-            return user
+        except AuthError as e:
+            raise AuthenticationError("Invalid email or password", e.code)
         except APIError as e:
-            if self.is_client_error(e.code):
-                raise AuthError("Invalid email or password", e.code)
             raise ServerError("server error", e.code)
     
     def get_user(self):
