@@ -9,41 +9,32 @@ from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 from myapp.models.user import User
+from myapp.models.vote import Vote
 
 
-class SupabaseCategoryManager:
+class SupabaseVoteManager:
     def __init__(self, supabase):
         self.supabase = supabase
 
-    def get_categories(self):
+    def get_all(self):
         try:
-            response = self.supabase.table("categories").select("*").execute()
+            response = self.supabase.table("votes").select("*").execute()
         except APIError as e:
             raise ServerError("server error", e.code)
-        categories = []
+        items = []
         for item in response.data:
-            categories.append(Category.from_json(item))
-        return categories
+            items.append(Vote.from_json(item))
+        return items
 
-    def upsert(self, category):
+    def upsert(self, vote):
         try:
-            response = (
-                self.supabase.table("categories")
-                .upsert(
-                    {
-                        "name": category.name,
-                        "is_spoiler": category.is_spoiler,
-                        "desc": category.desc,
-                        "is_negative": category.is_negative,
-                    }
-                )
-                .execute()
-            )
-
-            return Category.from_json(response.data[0])
+            row_json = vote.to_json()
+            row_json.pop("created_at")
+            response = self.supabase.table("votes").upsert(row_json).execute()
+            return Vote.from_json(response.data[0])
         except APIError as e:
             print(e.message)
             print(e.code)
             if is_client_error(e.code):
-                raise DbStateError("That category already exists", e.code)
+                raise DbStateError(e.message, e.code)
             raise ServerError("server error", e.code)

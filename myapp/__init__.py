@@ -9,6 +9,7 @@ from supabase import create_client
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
 from myapp.db.supabase_user_manager import SupabaseUserManager
 from myapp.db.supabase_thing_manager import SupabaseThingManager
+from myapp.db.supabase_vote_manager import SupabaseVoteManager
 from myapp.errors.authentication_error import AuthenticationError
 from myapp.errors.db_state_error import DbStateError
 from myapp.errors.server_error import ServerError
@@ -21,6 +22,7 @@ from flask_login import (
 )
 from myapp.models.category import Category
 from myapp.models.thing import Thing
+from myapp.models.vote import Vote
 
 
 def create_app(env="development"):
@@ -42,6 +44,7 @@ def create_app(env="development"):
     user_manager = SupabaseUserManager(supabase_client)
     thing_manager = SupabaseThingManager(supabase_client)
     category_manager = SupabaseCategoryManager(supabase_client)
+    vote_manager = SupabaseVoteManager(supabase_client)
 
     @app.route("/")
     def home():
@@ -82,6 +85,21 @@ def create_app(env="development"):
             category_manager.upsert(category)
             return {"message": "Successfully added!"}, 200
         except ServerError:
+            return {"message": "Server error"}, 500
+
+    @app.route("/api/vote", methods=["POST"])
+    @login_required
+    def upsert_vote():
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+        if not request.form.get("categoryName") or not request.form.get("thingName"):
+            return {"message": "Missing parameters"}, 400
+
+        try:
+            vote = Vote.from_request(request, current_user.id)
+            vote_manager.upsert(vote)
+            return {"message": "Successfully added!"}, 200
+        except ServerError as e:
+            print(e)
             return {"message": "Server error"}, 500
 
     @app.route("/api/thing", methods=["POST"])

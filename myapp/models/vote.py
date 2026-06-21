@@ -26,14 +26,25 @@ class Vote:
 
     def from_json(json):
         return Vote(
-            created_at=json["created_at"],
+            created_at=json.get("created_at"),
             user_id=json["user_id"],
             thing_name=json["thing_name"],
             category_name=json["category_name"],
-            is_spoiler=json["is_spoiler"],
-            comment=json["comment"],
-            is_favorite=json["is_favorite"],
+            spoiler_for=json.get("spoiler_for"),
+            comment=json.get("comment"),
+            is_favorite=json.get("is_favorite", False),
         )
+
+    def to_json(self):
+        return {
+            "created_at": self.created_at,
+            "user_id": self.user_id,
+            "thing_name": self.thing_name,
+            "category_name": self.category_name,
+            "spoiler_for": self.spoiler_for,
+            "comment": self.comment,
+            "is_favorite": self.is_favorite,
+        }
 
     def from_request(request, user_id):
         return Vote(
@@ -42,5 +53,5 @@ class Vote:
             thing_name=request.form.get("thingName"),
             spoiler_for=request.form.get("voteSpoilerFor"),
             comment=request.form.get("voteComment"),
-            is_favorite=request.form.get("voteIsFavorite"),
+            is_favorite=True if request.form.get("voteIsFavorite") else False,
         )

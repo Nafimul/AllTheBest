@@ -82,9 +82,11 @@ class SupabaseThingManager:
                 )
                 .execute()
             )
-
+            
             return Thing.from_json(response.data[0])
         except APIError as e:
+            print(e.message)
+            print(e.code)
             raise ServerError("server error", e.code)
 
     def add_image(self, img_file):
