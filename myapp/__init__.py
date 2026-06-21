@@ -107,16 +107,8 @@ def create_app(env="development"):
             return {"message": "Missing parameters"}, 400
         try:
             img_file = request.files.get("thingImage")
-            img_filename = None
-            if img_file:
-                img_file.filename += str(
-                    uuid.uuid4()
-                )  # to avoid name conflicts in storage
-                img_filename = img_file.filename
-                thing_manager.add_image(img_file)
-
-            thing = Thing.from_request(request, img_filename=img_filename)
-            thing_manager.upsert_thing(thing)
+            thing = Thing.from_request(request)
+            thing_manager.upsert_thing(thing, img_file)
             return {"message": "Success!"}, 200
         except ServerError:
             return {"message": "Server error"}, 500

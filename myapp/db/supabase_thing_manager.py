@@ -63,7 +63,7 @@ class SupabaseThingManager:
     #     except APIError as e:
     #         raise ServerError("server error", e.code)
 
-    def upsert_thing(self, thing: Thing):
+    def upsert_thing(self, thing: Thing, img_file=None):
         try:
             if (
                 thing.from_thing_name is not None
@@ -71,27 +71,38 @@ class SupabaseThingManager:
             ):
                 raise DbStateError("from thing not found", 404)
 
+            if img_file:
+                img_file.filename = thing.name
+                self.upsert_image(img_file)
+                thing.img_path = self.get_img_path(thing.name)
+
             row_json = thing.to_json()
             row_json.pop("created_at")
             response = self.supabase.table("things").upsert(row_json).execute()
 
             return Thing.from_json(response.data[0])
         except APIError as e:
+            print(e.message)
             raise ServerError("server error", e.code)
 
-    def add_image(self, img_file):
+    def upsert_image(self, img_file):
         try:
             self.supabase.storage.from_("ThingImages").upload(
-                f"{img_file.filename}",
-                img_file.read(),
-                {"content-type": img_file.content_type},
+                file=img_file.read(),
+                path=img_file.filename,
+                file_options={
+                    "upsert": "true",
+                    "content-type": img_file.content_type,
+                },
             )
         except (APIError, storage3.exceptions.StorageApiError) as e:
             raise ServerError("server error", e.code)
 
-    # def get_img_url(self, img_filename):
-    #     try:
-    #         image_url = self.supabase.storage.from_('ThingImages').get_public_url(f"{img_filename}")
-    #         return image_url
-    #     except (APIError, storage3.exceptions.StorageApiError) as e:
-    #         raise ServerError("server error", e.code)
+    def get_img_path(self, img_filename):
+        try:
+            image_url = self.supabase.storage.from_("ThingImages").get_public_url(
+                img_filename
+            )
+            return image_url
+        except (APIError, storage3.exceptions.StorageApiError) as e:
+            raise ServerError("server error", e.code)
