@@ -6,6 +6,7 @@ class Category:
         self.name = name
         self.is_spoiler = is_spoiler
         self.desc = desc
+        self.is_negative = is_negative
 
     def from_json(json):
         category = Category(
