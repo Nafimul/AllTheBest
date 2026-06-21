@@ -80,14 +80,9 @@ def create_app(env="development"):
         if not request.form.get("categoryName"):
             return {"message": "Missing parameters"}, 400
 
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         try:
             category = Category.from_request(request)
-            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-
             category_manager.upsert(category)
-            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
-
             return {"message": "Successfully added!"}, 200
         except ServerError as e:
             return {"message": "Server error"}, 500

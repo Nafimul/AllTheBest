@@ -95,20 +95,3 @@ class SupabaseThingManager:
     #         return image_url
     #     except (APIError, storage3.exceptions.StorageApiError) as e:
     #         raise ServerError("server error", e.code)
-
-    def signup(self, email, password, name):
-        try:
-            response = self.supabase.auth.sign_up(
-                {
-                    "email": email,
-                    "password": password,
-                    "options": {"data": {"name": name}},
-                }
-            )
-
-            data = response.model_dump()
-            return User.from_supabase_row_json(data["user"])
-        except AuthError as e:
-            raise AuthenticationError("email or name already in use", e.code)
-        except APIError as e:
-            raise ServerError("server error", e.code)
