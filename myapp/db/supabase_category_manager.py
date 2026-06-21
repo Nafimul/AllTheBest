@@ -8,7 +8,7 @@ from myapp.errors.error_categorizer import is_client_error
 from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
 from myapp.models.thing import Thing
-from myapp.user import User
+from myapp.models.user import User
 
 
 class SupabaseCategoryManager:
