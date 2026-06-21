@@ -33,8 +33,6 @@ class SupabaseVoteManager:
             response = self.supabase.table("votes").upsert(row_json).execute()
             return Vote.from_json(response.data[0])
         except APIError as e:
-            print(e.message)
-            print(e.code)
             if is_client_error(e.code):
                 raise DbStateError(e.message, e.code)
             raise ServerError("server error", e.code)
