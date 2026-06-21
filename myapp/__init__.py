@@ -4,6 +4,7 @@ import uuid
 
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
+from supabase import create_client
 
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
 from myapp.db.supabase_user_manager import SupabaseUserManager
@@ -35,15 +36,12 @@ def create_app(env="development"):
     login_manager.login_view = "login"
     login_manager.login_message = "You must be logged in to do that."
 
-    user_manager = SupabaseUserManager(
+    supabase_client = create_client(
         os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
     )
-    thing_manager = SupabaseThingManager(
-        os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
-    )
-    category_manager = SupabaseCategoryManager(
-        os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
-    )
+    user_manager = SupabaseUserManager(supabase_client)
+    thing_manager = SupabaseThingManager(supabase_client)
+    category_manager = SupabaseCategoryManager(supabase_client)
 
     @app.route("/")
     def home():

@@ -12,8 +12,8 @@ from myapp.user import User
 
 
 class SupabaseUserManager:
-    def __init__(self, url, key):
-        self.supabase = create_client(url, key)
+    def __init__(self, supabase):
+        self.supabase = supabase
 
     def signup(self, email, password, name):
         try:
