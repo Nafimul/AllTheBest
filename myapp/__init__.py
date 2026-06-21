@@ -73,7 +73,7 @@ def create_app(env="development"):
 
     @app.route("/api/category", methods=["POST"])
     # @login_required
-    def add_category():
+    def upsert_category():
         if not request.form.get("categoryName"):
             return {"message": "Missing parameters"}, 400
 
@@ -82,8 +82,9 @@ def create_app(env="development"):
                 name=request.form.get("categoryName"),
                 is_spoiler=request.form.get("categoryIsSpoiler"),
                 desc=request.form.get("categoryDesc"),
+                is_negative=request.form.get("categoryIsNegative"),
             )
-            category_manager.add_category(category)
+            category_manager.upsert(category)
             return {"message": "Successfully added!"}, 200
         except DbStateError as e:
             return {"message": "Already exists"}, 400
