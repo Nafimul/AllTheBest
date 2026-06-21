@@ -86,8 +86,6 @@ def create_app(env="development"):
             )
             category_manager.upsert(category)
             return {"message": "Successfully added!"}, 200
-        except DbStateError as e:
-            return {"message": "Already exists"}, 400
         except ServerError:
             return {"message": "Server error"}, 500
 
