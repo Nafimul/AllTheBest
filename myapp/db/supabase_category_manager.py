@@ -25,9 +25,22 @@ class SupabaseCategoryManager:
             categories.append(Category.from_json(item))
         return categories
 
-    def add_category(self, category: Category):
+    def upsert(self, category):
         try:
-            self.supabase.table("categories").insert({"name": category.name}).execute()
+            response = (
+                self.supabase.table("categories")
+                .upsert(
+                    {
+                        "name": category.name,
+                        "is_spoiler": category.is_spoiler,
+                        "desc": category.desc,
+                        "is_negative": category.is_negative,
+                    }
+                )
+                .execute()
+            )
+
+            return Thing.from_json(response.data[0])
         except APIError as e:
             if is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
