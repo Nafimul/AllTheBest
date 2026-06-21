@@ -33,8 +33,6 @@ class SupabaseCategoryManager:
 
             return Category.from_json(response.data[0])
         except APIError as e:
-            print(e.message)
-            print(e.code)
             if is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
             raise ServerError("server error", e.code)

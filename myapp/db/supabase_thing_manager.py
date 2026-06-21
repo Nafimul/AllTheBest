@@ -28,41 +28,6 @@ class SupabaseThingManager:
         except APIError as e:
             raise ServerError("server error", e.code)
 
-    # def update_thing(self, thing: Thing):
-    #     try:
-    #         if self.get_thing_by_id(thing.from_thing_id) is None:
-    #             raise DbStateError("from thing not found", 404)
-    #         if self.get_thing(thing.name) is None:
-    #             raise DbStateError("thing with that name not found", 404)
-    #         if thing.from_thing_name is not None and self.get_thing(thing.from_thing_name) is None:
-    #             raise DbStateError("from thing not found", 404)
-
-    #         response = self.supabase.table('things').update({
-    #             "image_url": thing.image_url,
-    #             "from_thing_name": thing.from_thing_name
-    #             }).eq("name", thing.name).execute()
-
-    #         return Thing.from_json(response.data[0])
-    #     except APIError as e:
-    #         raise ServerError("server error", e.code)
-
-    # def add_thing(self, thing: Thing):
-    #     try:
-    #         if self.get_thing(thing.name) is not None:
-    #             raise DbStateError("That thing already exists")
-    #         if thing.from_thing_name is not None and self.get_thing(thing.from_thing_name) is None:
-    #             raise DbStateError("from thing not found", 404)
-
-    #         response = self.supabase.table('things').insert({
-    #             "name": thing.name,
-    #             "image_url": thing.image_url,
-    #             "from_thing_id": thing.from_thing_id
-    #             }).execute()
-
-    #         return Thing.from_json(response.data[0])
-    #     except APIError as e:
-    #         raise ServerError("server error", e.code)
-
     def upsert_thing(self, thing: Thing, img_file=None):
         try:
             if (
@@ -82,7 +47,6 @@ class SupabaseThingManager:
 
             return Thing.from_json(response.data[0])
         except APIError as e:
-            print(e.message)
             raise ServerError("server error", e.code)
 
     def upsert_image(self, img_file):
