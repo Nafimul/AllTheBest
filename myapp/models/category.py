@@ -17,3 +17,14 @@ class Category:
             is_negative=json["is_negative"],
         )
         return category
+
+    def from_request(request):
+        if not request.form.get("categoryName"):
+            raise ValueError()
+
+        return Category(
+            name=request.form.get("categoryName"),
+            is_spoiler=True if request.form.get("categoryIsSpoiler") else False,
+            desc=request.form.get("categoryDesc"),
+            is_negative=True if request.form.get("categoryIsNegative") else False,
+        )

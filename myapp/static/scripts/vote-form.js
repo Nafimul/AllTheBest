@@ -36,8 +36,10 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         const formData = new FormData(form);
 
-        const categoryName = formData.get("categoryNamePrefix").trim() + formData.get("categoryName").trim();
+        const categoryNameWithoutPrefix = formData.get("categoryName").trim();
+        formData.set("categoryName", formData.get("categoryNamePrefix").trim() + " " + formData.get("categoryName").trim())
         const thingName = formData.get("thingName").trim();
+        const categoryName = formData.get("categoryName").trim()
 
         formMessage.innerText = "";
 
@@ -46,7 +48,7 @@ document.addEventListener("DOMContentLoaded", function() {
         let isAddingThing = false;
         let isAddingVote = false;
         
-        if (formData.get("categoryName").trim() !== "")
+        if (categoryNameWithoutPrefix !== "")
             isAddingCategory = true;
         if (thingName !== "")
             isAddingThing = true;

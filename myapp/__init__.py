@@ -59,7 +59,7 @@ def create_app(env="development"):
         return user
 
     @app.route("/categories")
-    def categories():
+    def list_categories():
         try:
             categories = category_manager.get_categories()
             return render_template("categories.html", categories=categories)
@@ -78,12 +78,7 @@ def create_app(env="development"):
             return {"message": "Missing parameters"}, 400
 
         try:
-            category = Category(
-                name=request.form.get("categoryName"),
-                is_spoiler=request.form.get("categoryIsSpoiler"),
-                desc=request.form.get("categoryDesc"),
-                is_negative=request.form.get("categoryIsNegative"),
-            )
+            category = Category.from_request(request)
             category_manager.upsert(category)
             return {"message": "Successfully added!"}, 200
         except ServerError:

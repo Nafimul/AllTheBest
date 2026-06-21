@@ -40,7 +40,7 @@ class SupabaseCategoryManager:
                 .execute()
             )
 
-            return Thing.from_json(response.data[0])
+            return Category.from_json(response.data[0])
         except APIError as e:
             if is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)

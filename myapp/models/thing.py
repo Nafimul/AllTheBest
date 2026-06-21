@@ -15,7 +15,6 @@ class Thing:
         self.from_thing_name = from_thing_name
 
     def __str__(self):
-        print(type(self.from_thing_name))
         return (
             f"Thing("
             f"name='{self.name}', "
