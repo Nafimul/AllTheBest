@@ -1,14 +1,5 @@
-import uuid
-
-
 class Thing:
     def __init__(self, name, from_thing_name=None, created_at=None, img_filename=None):
-        if not from_thing_name:
-            from_thing_name = None
-        if not created_at:
-            created_at = None
-        if not img_filename:
-            img_filename = None
         self.created_at = created_at
         self.name = name
         self.img_filename = img_filename
@@ -26,12 +17,20 @@ class Thing:
 
     def from_json(json):
         thing = Thing(
-            created_at=json["created_at"],
-            name=json["name"],
-            from_thing_name=json["from_thing_name"],
-            img_filename=json["img_filename"],
+            created_at=json.get("created_at"),
+            name=json.get("name"),
+            from_thing_name=json.get("from_thing_name"),
+            img_filename=json.get("img_filename"),
         )
         return thing
+
+    def to_json(self):
+        return {
+            "name": self.name,
+            "from_thing_name": self.from_thing_name,
+            "created_at": self.created_at,
+            "img_filename": self.img_filename,
+        }
 
     def from_request(request, img_filename=None):
         if not request.form.get("thingName"):
@@ -39,6 +38,10 @@ class Thing:
 
         return Thing(
             name=request.form.get("thingName"),
-            from_thing_name=request.form.get("fromThingName"),
+            from_thing_name=(
+                request.form.get("fromThingName")
+                if request.form.get("fromThingName") is not ""
+                else None
+            ),
             img_filename=img_filename,
         )

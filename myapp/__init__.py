@@ -80,17 +80,21 @@ def create_app(env="development"):
         if not request.form.get("categoryName"):
             return {"message": "Missing parameters"}, 400
 
+        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         try:
             category = Category.from_request(request)
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
             category_manager.upsert(category)
+            print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
+
             return {"message": "Successfully added!"}, 200
-        except ServerError:
+        except ServerError as e:
             return {"message": "Server error"}, 500
 
     @app.route("/api/vote", methods=["POST"])
     @login_required
     def upsert_vote():
-        print("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaa")
         if not request.form.get("categoryName") or not request.form.get("thingName"):
             return {"message": "Missing parameters"}, 400
 
@@ -99,7 +103,6 @@ def create_app(env="development"):
             vote_manager.upsert(vote)
             return {"message": "Successfully added!"}, 200
         except ServerError as e:
-            print(e)
             return {"message": "Server error"}, 500
 
     @app.route("/api/thing", methods=["POST"])

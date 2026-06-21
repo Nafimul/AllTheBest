@@ -11,10 +11,6 @@ class Vote:
     ):
         if not thing_name or not category_name or not user_id:
             raise ValueError()
-        # if empty string, set to none instead.
-        # because empty strings might override default values or mess up foreign key relationships if used in a db
-        if not created_at:
-            created_at = None
 
         self.user_id = user_id
         self.thing_name = thing_name

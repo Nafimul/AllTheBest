@@ -10,13 +10,22 @@ class Category:
 
     def from_json(json):
         category = Category(
-            name=json["name"],
-            created_at=json["created_at"],
-            is_spoiler=json["is_spoiler"],
-            desc=json["desc"],
-            is_negative=json["is_negative"],
+            name=json.get("name"),
+            created_at=json.get("created_at"),
+            is_spoiler=json.get("is_spoiler"),
+            desc=json.get("desc"),
+            is_negative=json.get("is_negative", False),
         )
         return category
+
+    def to_json(self):
+        return {
+            "name": self.name,
+            "created_at": self.created_at,
+            "is_spoiler": self.is_spoiler,
+            "desc": self.desc,
+            "is_negative": self.is_negative,
+        }
 
     def from_request(request):
         if not request.form.get("categoryName"):

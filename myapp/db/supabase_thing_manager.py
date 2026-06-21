@@ -71,18 +71,10 @@ class SupabaseThingManager:
             ):
                 raise DbStateError("from thing not found", 404)
 
-            response = (
-                self.supabase.table("things")
-                .upsert(
-                    {
-                        "name": thing.name,
-                        "img_filename": thing.img_filename,
-                        "from_thing_name": thing.from_thing_name,
-                    }
-                )
-                .execute()
-            )
-            
+            row_json = thing.to_json()
+            row_json.pop("created_at")
+            response = self.supabase.table("things").upsert(row_json).execute()
+
             return Thing.from_json(response.data[0])
         except APIError as e:
             raise ServerError("server error", e.code)

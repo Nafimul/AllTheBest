@@ -27,21 +27,14 @@ class SupabaseCategoryManager:
 
     def upsert(self, category):
         try:
-            response = (
-                self.supabase.table("categories")
-                .upsert(
-                    {
-                        "name": category.name,
-                        "is_spoiler": category.is_spoiler,
-                        "desc": category.desc,
-                        "is_negative": category.is_negative,
-                    }
-                )
-                .execute()
-            )
+            row_json = category.to_json()
+            row_json.pop("created_at")
+            response = self.supabase.table("categories").upsert(row_json).execute()
 
             return Category.from_json(response.data[0])
         except APIError as e:
+            print(e.message)
+            print(e.code)
             if is_client_error(e.code):
                 raise DbStateError("That category already exists", e.code)
             raise ServerError("server error", e.code)
