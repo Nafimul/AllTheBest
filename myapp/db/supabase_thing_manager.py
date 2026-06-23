@@ -28,7 +28,7 @@ class SupabaseThingManager:
                 return None
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
 
     def upsert_thing(self, thing: Thing, img_file=None):
         try:
@@ -49,7 +49,7 @@ class SupabaseThingManager:
 
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
 
     def _prepare_image_bytes(self, img_file: FileStorage) -> bytes:
         """Resize and encode a FileStorage image as optimized JPEG bytes."""
@@ -83,7 +83,7 @@ class SupabaseThingManager:
                 },
             )
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
 
     def get_img_path(self, img_filename):
         try:
@@ -92,4 +92,4 @@ class SupabaseThingManager:
             )
             return image_url
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)

@@ -28,7 +28,7 @@ class SupabaseUserManager:
         except AuthError as e:
             raise AuthenticationError("email or name already in use", e.code)
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
 
     def login(self, email, password):
         try:
@@ -41,7 +41,7 @@ class SupabaseUserManager:
         except AuthError as e:
             raise AuthenticationError("Invalid email or password", e.code)
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
 
     def get_user(self):
         try:
@@ -52,4 +52,4 @@ class SupabaseUserManager:
             data = response.model_dump()
             return User.from_supabase_row_json(data["user"])
         except httpx.HTTPError as e:
-            raise ConnectionError(e.message)
+            raise ConnectionError(e.args)
