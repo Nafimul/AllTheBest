@@ -1,10 +1,8 @@
+import httpx
 from postgrest import APIError
 import storage3
 from supabase import AuthError, create_client, Client
 import supabase_auth
-from myapp.errors.authentication_error import AuthenticationError
-from myapp.errors.db_state_error import DbStateError
-from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 from myapp.models.user import User
@@ -25,8 +23,8 @@ class SupabaseThingManager:
             if len(response.data) == 0:
                 return None
             return Thing.from_json(response.data[0])
-        except APIError as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()
 
     def upsert_thing(self, thing: Thing, img_file=None):
         try:
@@ -34,7 +32,7 @@ class SupabaseThingManager:
                 thing.from_thing_name is not None
                 and self.get_thing(thing.from_thing_name) is None
             ):
-                raise DbStateError("from thing not found", 404)
+                raise ValueError("from thing does not exist", 404)
 
             if img_file:
                 img_file.filename = thing.name
@@ -46,8 +44,8 @@ class SupabaseThingManager:
             response = self.supabase.table("things").upsert(row_json).execute()
 
             return Thing.from_json(response.data[0])
-        except APIError as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()
 
     def upsert_image(self, img_file):
         try:
@@ -59,8 +57,8 @@ class SupabaseThingManager:
                     "content-type": img_file.content_type,
                 },
             )
-        except (APIError, storage3.exceptions.StorageApiError) as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()
 
     def get_img_path(self, img_filename):
         try:
@@ -68,5 +66,5 @@ class SupabaseThingManager:
                 img_filename
             )
             return image_url
-        except (APIError, storage3.exceptions.StorageApiError) as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()

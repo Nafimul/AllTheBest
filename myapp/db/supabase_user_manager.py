@@ -1,11 +1,9 @@
+import httpx
 from postgrest import APIError
 import storage3
 from supabase import AuthError, create_client, Client
 import supabase_auth
 from myapp.errors.authentication_error import AuthenticationError
-from myapp.errors.db_state_error import DbStateError
-from myapp.errors.error_categorizer import is_client_error
-from myapp.errors.server_error import ServerError
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 from myapp.models.user import User
@@ -29,8 +27,8 @@ class SupabaseUserManager:
             return User.from_supabase_row_json(data["user"])
         except AuthError as e:
             raise AuthenticationError("email or name already in use", e.code)
-        except APIError as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()
 
     def login(self, email, password):
         try:
@@ -42,8 +40,8 @@ class SupabaseUserManager:
             return User.from_supabase_row_json(data["user"])
         except AuthError as e:
             raise AuthenticationError("Invalid email or password", e.code)
-        except APIError as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()
 
     def get_user(self):
         try:
@@ -53,5 +51,5 @@ class SupabaseUserManager:
 
             data = response.model_dump()
             return User.from_supabase_row_json(data["user"])
-        except APIError as e:
-            raise ServerError("server error", e.code)
+        except httpx.HTTPError as e:
+            raise ConnectionError()

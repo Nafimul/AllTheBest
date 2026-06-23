@@ -4,6 +4,7 @@ import uuid
 
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
+import httpx
 from supabase import create_client
 
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
@@ -11,8 +12,6 @@ from myapp.db.supabase_user_manager import SupabaseUserManager
 from myapp.db.supabase_thing_manager import SupabaseThingManager
 from myapp.db.supabase_vote_manager import SupabaseVoteManager
 from myapp.errors.authentication_error import AuthenticationError
-from myapp.errors.db_state_error import DbStateError
-from myapp.errors.server_error import ServerError
 from flask_login import (
     current_user,
     login_required,
@@ -46,8 +45,18 @@ def create_app(env="development"):
     category_manager = SupabaseCategoryManager(supabase_client)
     vote_manager = SupabaseVoteManager(supabase_client)
 
+    @app.errorhandler(ConnectionError)
+    def handle_connection_error(e):
+        return {"message": "Sorry. Connection issue on our end"}, 503
+
+    @app.errorhandler(Exception)
+    def handle_unexpected(e):
+        app.logger.exception(e)
+        return {"message": "Sorry. Something went wrong on our end"}, 500
+
     @app.route("/")
     def home():
+        # for auto logging in during development
         if os.environ.get("EMAIL"):
             user = user_manager.login(
                 os.environ.get("EMAIL"), os.environ.get("PASSWORD")
@@ -63,11 +72,8 @@ def create_app(env="development"):
 
     @app.route("/categories")
     def list_categories():
-        try:
-            categories = category_manager.get_categories()
-            return render_template("categories.html", categories=categories)
-        except ServerError:
-            return render_template("server-error.html")
+        categories = category_manager.get_categories()
+        return render_template("categories.html", categories=categories)
 
     @app.route("/vote-form")
     # @login_required
@@ -80,12 +86,9 @@ def create_app(env="development"):
         if not request.form.get("categoryName"):
             return {"message": "Missing parameters"}, 400
 
-        try:
-            category = Category.from_request(request)
-            category_manager.upsert(category)
-            return {"message": "Successfully added!"}, 200
-        except ServerError as e:
-            return {"message": "Server error"}, 500
+        category = Category.from_request(request)
+        category_manager.upsert(category)
+        return {"message": "Successfully added!"}, 200
 
     @app.route("/api/vote", methods=["POST"])
     @login_required
@@ -93,47 +96,38 @@ def create_app(env="development"):
         if not request.form.get("categoryName") or not request.form.get("thingName"):
             return {"message": "Missing parameters"}, 400
 
-        try:
-            vote = Vote.from_request(request, current_user.id)
-            vote_manager.upsert(vote)
-            return {"message": "Successfully added!"}, 200
-        except ServerError as e:
-            return {"message": "Server error"}, 500
+        vote = Vote.from_request(request, current_user.id)
+        vote_manager.upsert(vote)
+        return {"message": "Successfully added!"}, 200
 
     @app.route("/api/thing", methods=["POST"])
     # @login_required
     def upsert_thing():
         if not request.form.get("thingName"):
             return {"message": "Missing parameters"}, 400
-        try:
-            img_file = request.files.get("thingImage")
-            thing = Thing.from_request(request)
-            thing_manager.upsert_thing(thing, img_file)
-            return {"message": "Success!"}, 200
-        except ServerError:
-            return {"message": "Server error"}, 500
+
+        img_file = request.files.get("thingImage")
+        thing = Thing.from_request(request)
+        thing_manager.upsert_thing(thing, img_file)
+        return {"message": "Success!"}, 200
 
     @app.route("/login", methods=["GET", "POST"])
     def login():
         try:
-            if request.method == "POST":
-                email = request.form.get("email")
-                password = request.form.get("password")
-                try:
-                    user = user_manager.login(email, password)
-                    login_user(user)
-                    flash("Logged in successfully")
-                    return render_template("home.html")
-                except ServerError:
-                    flash("Invalid email or password")
-                    return render_template("login.html")
+            email = request.form.get("email")
+            password = request.form.get("password")
+            user = user_manager.login(email, password)
+            login_user(user)
 
-            return render_template("login.html")
-        except ServerError:
-            return render_template("server-error.html")
+            flash("Logged in successfully")
+            return render_template("home.html")
         except AuthenticationError:
             flash("invalid email or pass")
             return render_template("login.html")
+
+    @app.route("/login", methods=["GET"])
+    def login_form():
+        return render_template("login.html")
 
     @app.route("/signup", methods=["POST"])
     def signup():
@@ -148,8 +142,6 @@ def create_app(env="development"):
         except AuthenticationError:
             flash("email or name taken")
             return render_template("signup.html")
-        except ServerError:
-            return render_template("server-error.html")
 
     @app.route("/signup", methods=["GET"])
     def signup_form():
