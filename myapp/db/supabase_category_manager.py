@@ -20,7 +20,7 @@ class SupabaseCategoryManager:
                 categories.append(Category.from_json(item))
             return categories
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
 
     def upsert(self, category):
         try:
@@ -30,4 +30,4 @@ class SupabaseCategoryManager:
 
             return Category.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)

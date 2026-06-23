@@ -1,8 +1,12 @@
+import io
+
 import httpx
+from PIL import Image
 from postgrest import APIError
 import storage3
 from supabase import AuthError, create_client, Client
 import supabase_auth
+from werkzeug.datastructures import FileStorage
 from myapp.models.category import Category
 from myapp.models.thing import Thing
 from myapp.models.user import User
@@ -24,7 +28,7 @@ class SupabaseThingManager:
                 return None
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
 
     def upsert_thing(self, thing: Thing, img_file=None):
         try:
@@ -45,20 +49,41 @@ class SupabaseThingManager:
 
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
 
-    def upsert_image(self, img_file):
+    def _prepare_image_bytes(self, img_file: FileStorage) -> bytes:
+        """Resize and encode a FileStorage image as optimized JPEG bytes."""
+        img_file.stream.seek(0)
+
+        with Image.open(img_file.stream) as img:
+            max_width, max_height = 1024, 1024
+            width, height = img.size
+            if width > max_width or height > max_height:
+                scale = min(max_width / width, max_height / height)
+                new_width = int(width * scale)
+                new_height = int(height * scale)
+                img = img.resize((new_width, new_height), Image.LANCZOS)
+
+            if img.mode not in ("RGB", "L"):
+                img = img.convert("RGB")
+
+            buffer = io.BytesIO()
+            img.save(buffer, format="JPEG", quality=80, optimize=True)
+            return buffer.getvalue()
+
+    def upsert_image(self, img_file: FileStorage):
         try:
+            image_bytes = self._prepare_image_bytes(img_file)
             self.supabase.storage.from_("ThingImages").upload(
-                file=img_file.read(),
+                file=image_bytes,
                 path=img_file.filename,
                 file_options={
                     "upsert": "true",
-                    "content-type": img_file.content_type,
+                    "content-type": "image/jpeg",
                 },
             )
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
 
     def get_img_path(self, img_filename):
         try:
@@ -67,4 +92,4 @@ class SupabaseThingManager:
             )
             return image_url
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)

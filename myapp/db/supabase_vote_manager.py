@@ -21,7 +21,7 @@ class SupabaseVoteManager:
                 items.append(Vote.from_json(item))
             return items
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
 
     def upsert(self, vote):
         try:
@@ -30,4 +30,4 @@ class SupabaseVoteManager:
             response = self.supabase.table("votes").upsert(row_json).execute()
             return Vote.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError()
+            raise ConnectionError(e.message)
