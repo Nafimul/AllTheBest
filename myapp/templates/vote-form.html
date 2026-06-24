@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% block title %}Vote{% endblock %}
+{% block file_links %}
+    <script type='text/javascript' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
+{% endblock %}
+{% block content %}
+    <form method="POST" id="addForm">
+        <h2> Add a thing or category </h2>
+        <h2> Add both at once to submit a vote </h2>
+
+        <section id="thing">
+            <h3> Thing </h3>
+            <label for="thingName"> Name </label>
+            <input id="thingName" name="thingName" type="text" placeholder="Darth Vader">
+
+            <label for="fromThingName"> From </label>
+            <input id="fromThingName" name="fromThingName" type="text" placeholder="Star Wars">
+
+            <label for="thingImage"> Image </label>
+            <input id="thingImage" name="thingImage" type="file" accept="image/*">
+            <img id="imagePreview" alt="Image preview will appear here">
+        </section>
+
+        <section id="category">
+            <h3> Category </h3>
+            <label for="categoryName"> Name </label>
+            <select name="categoryNamePrefix" id="categoryNamePrefix">
+                <option value="Best">Best</option>
+                <option value="Worst">Worst</option>
+                <option value="Most">Most</option>
+                <option value="Least">Least</option>
+                <option value=""></option>
+            </select>
+            <input id="categoryName" name="categoryName" type="text" placeholder="identity reveal">
+
+            <label for="categoryIsSpoiler"> Spoiler Type Category? </label>
+            <input id="categoryIsSpoiler" name="categoryIsSpoiler" type="checkbox">
+
+            <label for="categoryIsNegative"> Negative? </label>
+            <input id="categoryIsNegative" name="categoryIsNegative" type="checkbox">
+
+            <label for="categoryDesc"> Description </label>
+            <input id="categoryDesc" name="categoryDesc" type="text" placeholder="When you don't know who someone is, but then you do.">
+        </section>
+
+        <section id="vote">
+            <h3> Vote </h3>
+            <label for="voteSpoilerFor"> This vote is a spoiler for (if applicable): </label>
+            <input id="voteSpoilerFor" name="voteSpoilerFor" type="text" placeholder="Star Wars Episode IV: The Empire Strikes Back">
+            
+            <label for="voteComment"> Comment on vote: </label>
+            <input id="voteComment" name="voteComment" type="text" placeholder="It was so cool.">
+
+            <label for="voteIsFavorite"> Favorite opinion of yours? </label>
+            <input id="voteIsFavorite" name="voteIsFavorite" type="checkbox">
+        </section>
+        
+        <button type="submit"> Add </button>
+    </form>
+    <p id="formMessage"></p>
+{% endblock %}
