@@ -1,24 +1,37 @@
+from typing import Any, Dict, Optional
+
+
 class Category:
     def __init__(
-        self, name, created_at=None, is_spoiler=False, desc=None, is_negative=False
-    ):
+        self,
+        name: str,
+        created_at: Optional[str] = None,
+        is_spoiler: bool = False,
+        desc: Optional[str] = None,
+        is_negative: bool = False,
+    ) -> None:
+        if not isinstance(name, str):
+            raise TypeError("categoryName must be a string")
+        if not name.strip():
+            raise ValueError("categoryName is required and must be a non-empty string")
+
         self.created_at = created_at
-        self.name = name
+        self.name = name.strip()
         self.is_spoiler = is_spoiler
         self.desc = desc
         self.is_negative = is_negative
 
-    def from_json(json):
-        category = Category(
-            name=json.get("name"),
-            created_at=json.get("created_at"),
-            is_spoiler=json.get("is_spoiler"),
-            desc=json.get("desc"),
-            is_negative=json.get("is_negative", False),
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Category":
+        return cls(
+            name=data.get("name"),
+            created_at=data.get("created_at"),
+            is_spoiler=bool(data.get("is_spoiler", False)),
+            desc=data.get("desc"),
+            is_negative=bool(data.get("is_negative", False)),
         )
-        return category
 
-    def to_json(self):
+    def to_json(self) -> Dict[str, Any]:
         return {
             "name": self.name,
             "created_at": self.created_at,
@@ -27,13 +40,17 @@ class Category:
             "is_negative": self.is_negative,
         }
 
-    def from_request(request):
-        if not request.form.get("categoryName"):
-            raise ValueError()
+    @classmethod
+    def from_request(cls, request: Any) -> "Category":
+        category_name = request.form.get("categoryName")
+        if not isinstance(category_name, str):
+            raise TypeError("categoryName must be a string")
+        if not category_name.strip():
+            raise ValueError("categoryName is required")
 
-        return Category(
-            name=request.form.get("categoryName"),
-            is_spoiler=True if request.form.get("categoryIsSpoiler") else False,
+        return cls(
+            name=category_name.strip(),
+            is_spoiler=bool(request.form.get("categoryIsSpoiler")),
             desc=request.form.get("categoryDesc"),
-            is_negative=True if request.form.get("categoryIsNegative") else False,
+            is_negative=bool(request.form.get("categoryIsNegative")),
         )

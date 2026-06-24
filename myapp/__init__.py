@@ -1,6 +1,7 @@
 import secrets
 import os
 import uuid
+from typing import Any, Optional
 
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
@@ -21,10 +22,11 @@ from flask_login import (
 )
 from myapp.models.category import Category
 from myapp.models.thing import Thing
+from myapp.models.user import User
 from myapp.models.vote import Vote
 
 
-def create_app(env="development"):
+def create_app(env: str = "development") -> Flask:
     load_dotenv()
     app = Flask(__name__)
     app.secret_key = secrets.token_hex(16)  # This is necessary for flash!
@@ -46,16 +48,20 @@ def create_app(env="development"):
     vote_manager = SupabaseVoteManager(supabase_client)
 
     @app.errorhandler(ConnectionError)
-    def handle_connection_error(e):
+    def handle_connection_error(e: ConnectionError):
+        if env == "development":
+            app.logger.exception(e)
         return {"message": "Sorry. Connection issue on our end"}, 503
 
     @app.errorhandler(Exception)
-    def handle_unexpected(e):
-        app.logger.exception(e)
+    def handle_unexpected(e: Exception):
+        if env == "development":
+            app.logger.exception(e)
         return {"message": "Sorry. Something went wrong on our end"}, 500
 
     @app.route("/")
-    def home():
+    def home() -> str:
+        """Render the home page."""
         # for auto logging in during development
         if os.environ.get("EMAIL"):
             user = user_manager.login(
@@ -66,53 +72,50 @@ def create_app(env="development"):
         return render_template("home.html")
 
     @login_manager.user_loader
-    def user_loader(id):
-        user = user_manager.get_user()
-        return user
+    def user_loader(id: str) -> Optional[User]:
+        """Load a user from the authentication backend."""
+        return user_manager.get_user()
 
     @app.route("/categories")
-    def list_categories():
+    def list_categories() -> str:
+        """Render the categories page with the current category list."""
         categories = category_manager.get_categories()
         return render_template("categories.html", categories=categories)
 
     @app.route("/vote-form")
     # @login_required
-    def vote_form():
+    def vote_form() -> str:
+        """Render the vote submission form."""
         return render_template("vote-form.html")
 
     @app.route("/api/category", methods=["POST"])
     # @login_required
-    def upsert_category():
-        if not request.form.get("categoryName"):
-            return {"message": "Missing parameters"}, 400
-
+    def upsert_category() -> tuple[dict, int]:
+        """Create or update a category from request data."""
         category = Category.from_request(request)
         category_manager.upsert(category)
         return {"message": "Successfully added!"}, 200
 
     @app.route("/api/vote", methods=["POST"])
     @login_required
-    def upsert_vote():
-        if not request.form.get("categoryName") or not request.form.get("thingName"):
-            return {"message": "Missing parameters"}, 400
-
+    def upsert_vote() -> tuple[dict, int]:
+        """Create or update a vote from request data."""
         vote = Vote.from_request(request, current_user.id)
         vote_manager.upsert(vote)
         return {"message": "Successfully added!"}, 200
 
     @app.route("/api/thing", methods=["POST"])
     # @login_required
-    def upsert_thing():
-        if not request.form.get("thingName"):
-            return {"message": "Missing parameters"}, 400
-
+    def upsert_thing() -> tuple[dict, int]:
+        """Create or update a thing with optional image upload."""
         img_file = request.files.get("thingImage")
         thing = Thing.from_request(request)
         thing_manager.upsert_thing(thing, img_file)
         return {"message": "Success!"}, 200
 
     @app.route("/login", methods=["GET", "POST"])
-    def login():
+    def login() -> str:
+        """Handle login form submission and render results."""
         try:
             email = request.form.get("email")
             password = request.form.get("password")
@@ -121,8 +124,8 @@ def create_app(env="development"):
 
             flash("Logged in successfully")
             return render_template("home.html")
-        except AuthenticationError:
-            flash("invalid email or pass")
+        except (AuthenticationError, TypeError, ValueError) as e:
+            flash(str(e))
             return render_template("login.html")
 
     @app.route("/login", methods=["GET"])
@@ -130,7 +133,8 @@ def create_app(env="development"):
         return render_template("login.html")
 
     @app.route("/signup", methods=["POST"])
-    def signup():
+    def signup() -> str:
+        """Handle signup form submission and render the signup page."""
         try:
             email = request.form.get("email")
             password = request.form.get("password")
@@ -139,8 +143,11 @@ def create_app(env="development"):
             user_manager.login(email, password)
             flash("Signup successful. You are now logged in.")
             return render_template("signup.html")
-        except AuthenticationError:
-            flash("email or name taken")
+        except AuthenticationError as e:
+            flash(str(e))
+            return render_template("signup.html")
+        except (TypeError, ValueError) as e:
+            flash(str(e))
             return render_template("signup.html")
 
     @app.route("/signup", methods=["GET"])
@@ -148,7 +155,8 @@ def create_app(env="development"):
         return render_template("signup.html")
 
     @app.route("/profile", methods=["GET"])
-    def profile():
+    def profile() -> str:
+        """Render the current user's profile."""
         return render_template("profile.html", user=current_user)
 
     return app

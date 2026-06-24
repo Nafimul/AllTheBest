@@ -1,7 +1,21 @@
+from typing import Any, Dict, Optional
+
+
 class Thing:
-    def __init__(self, name, from_thing_name=None, created_at=None, img_path=None):
+    def __init__(
+        self,
+        name: str,
+        from_thing_name: Optional[str] = None,
+        created_at: Optional[str] = None,
+        img_path: Optional[str] = None,
+    ) -> None:
+        if not isinstance(name, str):
+            raise TypeError("thingName must be a string")
+        if not name.strip():
+            raise ValueError("thingName is required and must be a non-empty string")
+
         self.created_at = created_at
-        self.name = name
+        self.name = name.strip()
         self.img_path = img_path
         self.from_thing_name = from_thing_name
 
@@ -15,16 +29,21 @@ class Thing:
             f")"
         )
 
-    def from_json(json):
-        thing = Thing(
-            created_at=json.get("created_at"),
-            name=json.get("name"),
-            from_thing_name=json.get("from_thing_name"),
-            img_path=json.get("img_path"),
-        )
-        return thing
+    @classmethod
+    def from_json(cls, data: Dict[str, Any]) -> "Thing":
+        name = data.get("name")
+        from_thing_name = data.get("from_thing_name")
+        img_path = data.get("img_path")
+        created_at = data.get("created_at")
 
-    def to_json(self):
+        return cls(
+            name=name,
+            from_thing_name=from_thing_name,
+            created_at=created_at,
+            img_path=img_path,
+        )
+
+    def to_json(self) -> Dict[str, Any]:
         return {
             "name": self.name,
             "from_thing_name": self.from_thing_name,
@@ -32,15 +51,16 @@ class Thing:
             "img_path": self.img_path,
         }
 
-    def from_request(request):
-        if not request.form.get("thingName"):
-            raise ValueError()
+    @classmethod
+    def from_request(cls, request: Any) -> "Thing":
+        thing_name = request.form.get("thingName")
+        if not isinstance(thing_name, str):
+            raise TypeError("thingName must be a string")
+        if not thing_name.strip():
+            raise ValueError("thingName is required")
 
-        return Thing(
-            name=request.form.get("thingName"),
-            from_thing_name=(
-                request.form.get("fromThingName")
-                if request.form.get("fromThingName") is not ""
-                else None
-            ),
-        )
+        from_thing_name = request.form.get("fromThingName")
+        if isinstance(from_thing_name, str) and not from_thing_name.strip():
+            from_thing_name = None
+
+        return cls(name=thing_name.strip(), from_thing_name=from_thing_name)

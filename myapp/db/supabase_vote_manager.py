@@ -1,19 +1,17 @@
+from typing import Any, List
+
 import httpx
-from postgrest import APIError
-import storage3
-from supabase import AuthError, create_client, Client
-import supabase_auth
-from myapp.models.category import Category
-from myapp.models.thing import Thing
-from myapp.models.user import User
+
 from myapp.models.vote import Vote
 
 
 class SupabaseVoteManager:
-    def __init__(self, supabase):
+    def __init__(self, supabase: Any) -> None:
+        """Manage vote CRUD operations in Supabase."""
         self.supabase = supabase
 
-    def get_all(self):
+    def get_all(self) -> List[Vote]:
+        """Return all votes stored in Supabase."""
         try:
             response = self.supabase.table("votes").select("*").execute()
             items = []
@@ -21,13 +19,21 @@ class SupabaseVoteManager:
                 items.append(Vote.from_json(item))
             return items
         except httpx.HTTPError as e:
-            raise ConnectionError(e.args)
+            raise ConnectionError(str(e)) from e
 
-    def upsert(self, vote):
+    def upsert(self, vote: Vote) -> Vote:
+        """Insert or update a vote record."""
+        if vote is None:
+            raise ValueError("vote is required")
+        if not isinstance(vote, Vote):
+            raise TypeError("vote must be a Vote instance")
+
         try:
             row_json = vote.to_json()
-            row_json.pop("created_at")
+            row_json.pop("created_at", None)
             response = self.supabase.table("votes").upsert(row_json).execute()
+            if not response.data:
+                raise ConnectionError("Vote upsert did not return data")
             return Vote.from_json(response.data[0])
         except httpx.HTTPError as e:
-            raise ConnectionError(e.args)
+            raise ConnectionError(str(e)) from e
