@@ -36,10 +36,15 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         const formData = new FormData(form);
 
-        const categoryNameWithoutPrefix = formData.get("categoryName").trim();
-        formData.set("categoryName", formData.get("categoryNamePrefix").trim() + " " + formData.get("categoryName").trim())
-        const thingName = formData.get("thingName").trim();
-        const categoryName = formData.get("categoryName").trim()
+        const categoryNameWithoutPrefix = formData.get("categoryName").trim().toUpperCase();
+        const categoryNamePrefix = formData.get("categoryNamePrefix").trim().toUpperCase();
+        const thingName = formData.get("thingName").trim().toUpperCase();
+        const categoryName = categoryNamePrefix + " " + categoryNameWithoutPrefix;
+        formData.set("categoryName", categoryName);
+        formData.set("categoryNamePrefix", categoryNamePrefix);
+        formData.set("thingName", thingName);
+        if (formData.get("fromThing"))
+            formData.set("fromThing", formData.get("fromThing").trim().toUpperCase());
 
         formMessage.innerText = "";
 
