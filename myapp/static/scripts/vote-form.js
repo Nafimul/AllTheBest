@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
 
     function changeIsNegative(e) {
-        if (e.target.value === "Worst" || e.target.value === "Least")
+        if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")
             categoryIsNegativeEl.checked = true;
         else {
             categoryIsNegativeEl.checked = false;
