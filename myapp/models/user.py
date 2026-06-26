@@ -8,7 +8,7 @@ class User(flask_login.UserMixin):
         if (
             (not isinstance(id, str))
             or not isinstance(name, str)
-            or (email and not isinstance(email))
+            or (email and not isinstance(email, str))
         ):
             raise TypeError()
 
