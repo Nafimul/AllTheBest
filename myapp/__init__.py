@@ -79,8 +79,10 @@ def create_app(env: str = "development") -> Flask:
     @app.route("/categories")
     def list_categories() -> str:
         """Render the categories page with the current category list."""
-        categories = category_manager.get_categories()
-        return render_template("categories.html", categories=categories)
+        categories_with_scores = category_manager.get_categories_with_scores()
+        return render_template(
+            "categories.html", categories_with_scores=categories_with_scores
+        )
 
     @app.route("/vote-form")
     # @login_required
