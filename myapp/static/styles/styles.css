@@ -5,3 +5,10 @@ article {
 .negative {
     color: red;
 }
+
+li {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
