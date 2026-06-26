@@ -12,20 +12,16 @@ class Vote:
         created_at: Optional[str] = None,
         is_favorite: bool = False,
     ) -> None:
-        if not isinstance(user_id, str):
-            raise TypeError("user_id must be a string")
-        if not user_id.strip():
-            raise ValueError("user_id is required")
-
-        if not isinstance(thing_name, str):
-            raise TypeError("thingName must be a string")
-        if not thing_name.strip():
-            raise ValueError("thingName is required")
-
-        if not isinstance(category_name, str):
-            raise TypeError("categoryName must be a string")
-        if not category_name.strip():
-            raise ValueError("categoryName is required")
+        if (
+            (spoiler_for and not isinstance(spoiler_for, str))
+            or (not isinstance(user_id, str))
+            or (not isinstance(thing_name, str))
+            or (not isinstance(category_name, str))
+            or (comment and not isinstance(comment, str))
+            or (created_at and not isinstance(created_at, str))
+            or (not isinstance(is_favorite, bool))
+        ):
+            raise TypeError()
 
         self.user_id = user_id.strip()
         self.thing_name = thing_name.strip()

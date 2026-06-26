@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Category:
@@ -14,6 +14,13 @@ class Category:
             raise TypeError("categoryName must be a string")
         if not name.strip():
             raise ValueError("categoryName is required and must be a non-empty string")
+        if (
+            (created_at and not isinstance(created_at, str))
+            or (not isinstance(is_spoiler, bool))
+            or (desc and not isinstance(desc, str))
+            or (not isinstance(is_negative, bool))
+        ):
+            raise TypeError()
 
         self.created_at = created_at
         self.name = name.strip()

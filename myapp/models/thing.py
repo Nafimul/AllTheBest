@@ -9,8 +9,13 @@ class Thing:
         created_at: Optional[str] = None,
         img_path: Optional[str] = None,
     ) -> None:
-        if not isinstance(name, str):
-            raise TypeError("thingName must be a string")
+        if (
+            (from_thing_name and not isinstance(from_thing_name, str))
+            or (not isinstance(name, str))
+            or (created_at and not isinstance(created_at, str))
+            or (img_path and not isinstance(img_path, str))
+        ):
+            raise TypeError()
         if not name.strip():
             raise ValueError("thingName is required and must be a non-empty string")
 
