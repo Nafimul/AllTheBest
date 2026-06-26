@@ -16,11 +16,9 @@ class Thing:
             or (img_path and not isinstance(img_path, str))
         ):
             raise TypeError()
-        if not name.strip():
-            raise ValueError("thingName is required and must be a non-empty string")
 
         self.created_at = created_at
-        self.name = name.strip()
+        self.name = name
         self.img_path = img_path
         self.from_thing_name = from_thing_name
 
@@ -61,11 +59,11 @@ class Thing:
         thing_name = request.form.get("thingName")
         if not isinstance(thing_name, str):
             raise TypeError("thingName must be a string")
-        if not thing_name.strip():
+        if not thing_name:
             raise ValueError("thingName is required")
 
         from_thing_name = request.form.get("fromThingName")
-        if isinstance(from_thing_name, str) and not from_thing_name.strip():
+        if isinstance(from_thing_name, str) and not from_thing_name:
             from_thing_name = None
 
-        return cls(name=thing_name.strip(), from_thing_name=from_thing_name)
+        return cls(name=thing_name, from_thing_name=from_thing_name)

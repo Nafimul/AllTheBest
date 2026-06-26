@@ -23,9 +23,9 @@ class Vote:
         ):
             raise TypeError()
 
-        self.user_id = user_id.strip()
-        self.thing_name = thing_name.strip()
-        self.category_name = category_name.strip()
+        self.user_id = user_id
+        self.thing_name = thing_name
+        self.category_name = category_name
         self.spoiler_for = spoiler_for
         self.comment = comment
         self.created_at = created_at
@@ -58,12 +58,12 @@ class Vote:
     def from_request(cls, request: Any, user_id: str) -> "Vote":
         if not isinstance(user_id, str):
             raise TypeError("user_id must be a string")
-        if not user_id.strip():
+        if not user_id:
             raise ValueError("user_id is required")
 
         return cls(
             category_name=request.form.get("categoryName"),
-            user_id=user_id.strip(),
+            user_id=user_id,
             thing_name=request.form.get("thingName"),
             spoiler_for=request.form.get("voteSpoilerFor"),
             comment=request.form.get("voteComment"),

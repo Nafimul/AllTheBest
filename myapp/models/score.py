@@ -9,8 +9,6 @@ class Score:
             or not isinstance(num_votes, int)
         ):
             raise TypeError()
-        if not category_name.strip() or not thing_name.strip():
-            raise ValueError("empty string")
 
         self.category_name = category_name
         self.thing_name = thing_name

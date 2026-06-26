@@ -18,14 +18,14 @@ class SupabaseThingManager:
         """Return a Thing by name or None if not found."""
         if not isinstance(name, str):
             raise TypeError("name must be a string")
-        if not name.strip():
+        if not name:
             raise ValueError("name is required and must be a non-empty string")
 
         try:
             response = (
                 self.supabase.table("things")
                 .select("*")
-                .filter("name", "eq", name.strip())
+                .filter("name", "eq", name)
                 .execute()
             )
             if not response.data:
@@ -113,12 +113,12 @@ class SupabaseThingManager:
         """Return a public image URL for a stored thing image."""
         if not isinstance(img_filename, str):
             raise TypeError("img_filename must be a string")
-        if not img_filename.strip():
+        if not img_filename:
             raise ValueError("img_filename is required")
 
         try:
             image_url = self.supabase.storage.from_("ThingImages").get_public_url(
-                img_filename.strip()
+                img_filename
             )
             return image_url
         except httpx.HTTPError as e:

@@ -16,23 +16,23 @@ class SupabaseUserManager:
         """Register a new user with email, password, and name."""
         if not isinstance(email, str):
             raise TypeError("email must be a string")
-        if not email.strip():
+        if not email:
             raise ValueError("email is required")
         if not isinstance(password, str):
             raise TypeError("password must be a string")
-        if not password.strip():
+        if not password:
             raise ValueError("password is required")
         if not isinstance(name, str):
             raise TypeError("name must be a string")
-        if not name.strip():
+        if not name:
             raise ValueError("name is required")
 
         try:
             response = self.supabase.auth.sign_up(
                 {
-                    "email": email.strip(),
+                    "email": email,
                     "password": password,
-                    "options": {"data": {"name": name.strip()}},
+                    "options": {"data": {"name": name}},
                 }
             )
             data = response.model_dump()
@@ -46,16 +46,16 @@ class SupabaseUserManager:
         """Authenticate a user by email and password."""
         if not isinstance(email, str):
             raise TypeError("email must be a string")
-        if not email.strip():
+        if not email:
             raise ValueError("email is required")
         if not isinstance(password, str):
             raise TypeError("password must be a string")
-        if not password.strip():
+        if not password:
             raise ValueError("password is required")
 
         try:
             response = self.supabase.auth.sign_in_with_password(
-                {"email": email.strip(), "password": password}
+                {"email": email, "password": password}
             )
             data = response.model_dump()
             return User.from_supabase_row_json(data["user"])
