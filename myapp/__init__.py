@@ -50,13 +50,13 @@ def create_app(env: str = "development") -> Flask:
     @app.errorhandler(ConnectionError)
     def handle_connection_error(e: ConnectionError):
         if env == "development":
-            app.logger.exception(e)
+            raise e
         return {"message": "Sorry. Connection issue on our end"}, 503
 
     @app.errorhandler(Exception)
     def handle_unexpected(e: Exception):
         if env == "development":
-            app.logger.exception(e)
+            raise e
         return {"message": "Sorry. Something went wrong on our end"}, 500
 
     @app.route("/")
