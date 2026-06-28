@@ -11,6 +11,70 @@ li {
     flex-direction: row;
     gap: 10px;
     align-items: center;
+}.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.thing-form {
+    margin-bottom: 18px;
+}
+
+.form-card {
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    padding: 18px;
+    background: #fafafa;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+}
+
+.form-card h3 {
+    margin-top: 0;
+}
+
+.form-card label {
+    display: block;
+    margin-top: 12px;
+    margin-bottom: 4px;
+}
+
+.form-card input[type="text"],
+.form-card input[type="file"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #bbb;
+    border-radius: 6px;
+    box-sizing: border-box;
+}
+
+.imagePreview {
+    display: block;
+    width: 100%;
+    max-width: 240px;
+    margin-top: 12px;
+    border-radius: 8px;
+    object-fit: contain;
+}
+
+.formMessage {
+    margin-top: 14px;
+    min-height: 1.2em;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: red;
+}
+
+#formsContainer {
+    display: grid;
+    gap: 16px;
+}
 }
 
 .profile-votes {
