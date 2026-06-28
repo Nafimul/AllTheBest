@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %}Thing{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
 {% block content %}
     {% if thing %}
         <section class="thing-detail">
@@ -26,16 +29,18 @@
                     </thead>
                     <tbody>
                         {% for score in thing_scores %}
-                            <tr>
+                            <tr data-category-name="{{ score.category_name }}">
                                 <td>{{ score.rank_text }}</td>
                                 <td>{{ score.category_name }}</td>
                                 <td>{{ score.num_votes }}</td>
                                 <td>
-                                    <form action="{{ url_for('upsert_vote') }}" method="post">
-                                        <input type="hidden" name="categoryName" value="{{ score.category_name }}" />
-                                        <input type="hidden" name="thingName" value="{{ thing.name }}" />
-                                        <button type="submit" class="upvote_button">Upvote</button>
-                                    </form>
+                                    <button class="upvote_button" data-category="{{ score.category_name }}" data-thing="{{ thing.name }}">
+                                        <img
+                                            src='{{ url_for("static", filename="assets/images/"
+                                                + ("up_arrow_green.png" if score.category_name in current_user_votes and current_user_votes[score.category_name] == thing.name else "up_arrow_white.png")
+                                                ) }}'
+                                            width="10" height="10" class="upvote_img">
+                                    </button>
                                 </td>
                             </tr>
                         {% endfor %}

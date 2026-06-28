@@ -41,7 +41,11 @@ def _rank_suffix(rank: int) -> str:
 
 def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
     return next(
-        (index + 1 for index, item in enumerate(category_scores) if item.thing_name == score.thing_name),
+        (
+            index + 1
+            for index, item in enumerate(category_scores)
+            if item.thing_name == score.thing_name
+        ),
         len(category_scores),
     )
 
@@ -68,7 +72,9 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
             }
         )
 
-    return sorted(thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"]))
+    return sorted(
+        thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"])
+    )
 
 
 def create_app(env: str = "development") -> Flask:
