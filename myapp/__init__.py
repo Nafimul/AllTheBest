@@ -80,8 +80,17 @@ def create_app(env: str = "development") -> Flask:
     def list_categories() -> str:
         """Render the categories page with the current category list."""
         categories_with_scores = category_manager.get_categories_with_scores()
+        current_user_votes = []
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = {
+                vote.category_name: vote.thing_name
+                for vote in current_user_vote_objects
+            }
         return render_template(
-            "categories.html", categories_with_scores=categories_with_scores
+            "categories.html",
+            categories_with_scores=categories_with_scores,
+            current_user_votes=current_user_votes,
         )
 
     @app.route("/vote-form")

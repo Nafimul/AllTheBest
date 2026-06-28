@@ -15,7 +15,11 @@
                         <p> {{ score.num_votes }} </p>
                         <button class="upvote_button">
                             <img
-                            src='{{ url_for("static", filename="assets/images/up_arrow_white.png") }}'
+                            src='{{ url_for("static", filename="assets/images/"
+                                + ("up_arrow_green.png" if
+                                key.name in current_user_votes and current_user_votes[key.name] == score.thing_name
+                                else "up_arrow_white.png")
+                                ) }}'
                             width="10" height="10" class="upvote_img">
                         </button>
                     </li>
