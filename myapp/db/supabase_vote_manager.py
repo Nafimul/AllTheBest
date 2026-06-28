@@ -21,6 +21,22 @@ class SupabaseVoteManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def get_by_user_id(self, user_id) -> List[Vote]:
+        """Return all votes stored in Supabase."""
+        try:
+            response = (
+                self.supabase.table("votes")
+                .select("*")
+                .filter("user_id", "eq", user_id)
+                .execute()
+            )
+            items = []
+            for item in response.data:
+                items.append(Vote.from_json(item))
+            return items
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def upsert(self, vote: Vote) -> Vote:
         """Insert or update a vote record."""
         if vote is None:
