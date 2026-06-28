@@ -11,7 +11,9 @@
                 <ol type="1">
                     {% for score in value %}
                     <li id="{{ score.thing_name }}">
-                        <p> {{ score.thing_name }} </p>
+                        <p>
+                            <a href="{{ url_for('show_thing', name=score.thing_name) }}">{{ score.thing_name }}</a>
+                        </p>
                         <p> {{ score.num_votes }} </p>
                         <button class="upvote_button">
                             <img

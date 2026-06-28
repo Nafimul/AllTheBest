@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block title %}Thing{% endblock %}
+{% block content %}
+    {% if thing %}
+        <section class="thing-detail">
+            <h2>{{ thing.name }}</h2>
+            {% if thing.from_thing_name %}
+                <p class="thing-from">from {{ thing.from_thing_name }}</p>
+            {% endif %}
+            {% if thing.img_path %}
+                <img src="{{ thing.img_path }}" alt="{{ thing.name }}" class="thing-image" />
+            {% endif %}
+        </section>
+
+        <section class="thing-scores">
+            <h3>Scores</h3>
+            {% if thing_scores %}
+                <table class="leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Category</th>
+                            <th>Votes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for score in thing_scores %}
+                            <tr>
+                                <td>{{ score.rank_text }}</td>
+                                <td>{{ score.category_name }}</td>
+                                <td>{{ score.num_votes }}</td>
+                                <td>
+                                    <form action="{{ url_for('upsert_vote') }}" method="post">
+                                        <input type="hidden" name="categoryName" value="{{ score.category_name }}" />
+                                        <input type="hidden" name="thingName" value="{{ thing.name }}" />
+                                        <button type="submit" class="upvote_button">Upvote</button>
+                                    </form>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>This thing does not yet have any scores.</p>
+            {% endif %}
+        </section>
+    {% else %}
+        <p>Thing not found.</p>
+    {% endif %}
+{% endblock %}

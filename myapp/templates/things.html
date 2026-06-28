@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Things{% endblock %}
+{% block content %}
+    <h2>All Things</h2>
+    {% if things %}
+        <ul class="things-list">
+            {% for thing in things %}
+                <li>
+                    <a href="{{ url_for('show_thing', name=thing.name) }}">{{ thing.name }}</a>
+                    {% if thing.from_thing_name %}
+                        <span class="thing-from">from {{ thing.from_thing_name }}</span>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No things yet.</p>
+    {% endif %}
+{% endblock %}
