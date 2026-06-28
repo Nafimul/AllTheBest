@@ -128,8 +128,9 @@ class SupabaseThingManager:
             raise ValueError("img_filename is required")
 
         try:
-            image_url = self.supabase.storage.from_("ThingImages").get_public_url(
-                img_filename
+            image_url = (
+                self.supabase.storage.from_("ThingImages").get_public_url(img_filename)
+                + ".JPEG"
             )
             return image_url
         except httpx.HTTPError as e:

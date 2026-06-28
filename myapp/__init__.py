@@ -79,6 +79,18 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
     return sorted(
         thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"])
     )
+def build_profile_vote_entries(
+    votes: list[Vote], thing_manager: Any
+) -> list[dict[str, Any]]:
+    """Return vote entries sorted with favorite votes first and enriched with thing data."""
+    sorted_votes = sorted(votes, key=lambda vote: vote.is_favorite, reverse=True)
+    entries = []
+    for vote in sorted_votes:
+        thing = None
+        if thing_manager is not None:
+            thing = thing_manager.get_thing(vote.thing_name)
+        entries.append({"vote": vote, "thing": thing})
+    return entries
 
 
 def create_app(env: str = "development") -> Flask:
@@ -192,6 +204,10 @@ def create_app(env: str = "development") -> Flask:
             thing_scores=thing_scores,
             current_user_votes=current_user_votes,
         )
+    @app.route("/add-things")
+    def add_things() -> str:
+        """Render the thing submission page."""
+        return render_template("add-things.html")
 
     @app.route("/api/category", methods=["POST"])
     # @login_required
@@ -269,7 +285,16 @@ def create_app(env: str = "development") -> Flask:
 
     @app.route("/profile", methods=["GET"])
     def profile() -> str:
-        """Render the current user's profile."""
-        return render_template("profile.html", user=current_user)
+        """Render the current user's profile with their vote history."""
+        profile_votes = []
+        if current_user.is_authenticated:
+            user_votes = vote_manager.get_by_user_id(current_user.id)
+            profile_votes = build_profile_vote_entries(user_votes, thing_manager)
+
+        return render_template(
+            "profile.html",
+            user=current_user,
+            profile_votes=profile_votes,
+        )
 
     return app
