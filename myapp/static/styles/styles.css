@@ -12,3 +12,38 @@ li {
     gap: 10px;
     align-items: center;
 }
+
+.profile-votes {
+    list-style: none;
+    padding: 0;
+    display: grid;
+    gap: 12px;
+}
+
+.profile-vote-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 12px;
+    align-items: center;
+}
+
+.profile-vote-card.favorite {
+    border-color: #f0b429;
+    background-color: #fff8e1;
+}
+
+.profile-vote-image {
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+}
+
+.profile-vote-image.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    color: #666;
+    font-size: 0.8rem;
+}
