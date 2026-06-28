@@ -1,5 +1,7 @@
 from typing import Any, Dict, Optional
 
+from flask import json
+
 
 class Vote:
     def __init__(
@@ -69,3 +71,6 @@ class Vote:
             comment=request.form.get("voteComment"),
             is_favorite=bool(request.form.get("voteIsFavorite")),
         )
+
+    def __str__(self):
+        return json.dumps(self.to_json())
