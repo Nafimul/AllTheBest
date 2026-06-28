@@ -102,6 +102,11 @@ def create_app(env: str = "development") -> Flask:
         """Render the vote submission form."""
         return render_template("vote-form.html")
 
+    @app.route("/add-things")
+    def add_things() -> str:
+        """Render the thing submission page."""
+        return render_template("add-things.html")
+
     @app.route("/api/category", methods=["POST"])
     # @login_required
     def upsert_category() -> tuple[dict, int]:
