@@ -13,3 +13,12 @@ export async function postFormToApi(formData, url) {
         return null;
     }
 }
+
+export async function postVote(categoryName, thingName)
+{
+    const formData = new FormData();
+    formData.append("categoryName", categoryName);
+    formData.append("thingName", thingName);
+    const success = await postFormToApi(formData, "/api/vote");
+    return success;
+}
