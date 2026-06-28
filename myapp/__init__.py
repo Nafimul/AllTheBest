@@ -27,6 +27,7 @@ from myapp.models.user import User
 from myapp.models.vote import Vote
 
 
+# Return the ordinal suffix for a rank (e.g. 1 -> 'st', 2 -> 'nd', 3 -> 'rd').
 def _rank_suffix(rank: int) -> str:
     if 11 <= (rank % 100) <= 13:
         return "th"
@@ -39,6 +40,7 @@ def _rank_suffix(rank: int) -> str:
     return "th"
 
 
+# Return the 1-based rank of the given score within its category score list.
 def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
     return next(
         (
@@ -50,6 +52,8 @@ def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
     )
 
 
+# Build a list of score rows for a thing, sorted with first-place categories first.
+# name: thing name to filter on, scores: all category scores.
 def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
     categories_by_name: dict[str, list[Score]] = {}
     for score in scores:
@@ -204,7 +208,7 @@ def create_app(env: str = "development") -> Flask:
         vote = Vote.from_request(request, current_user.id)
         vote_manager.upsert(vote)
         return {"message": "Successfully added!"}, 200
-    
+
     @app.route("/api/vote", methods=["DELETE"])
     @login_required
     def delete_vote() -> tuple[dict, int]:
