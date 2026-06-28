@@ -204,6 +204,14 @@ def create_app(env: str = "development") -> Flask:
         vote = Vote.from_request(request, current_user.id)
         vote_manager.upsert(vote)
         return {"message": "Successfully added!"}, 200
+    
+    @app.route("/api/vote", methods=["DELETE"])
+    @login_required
+    def delete_vote() -> tuple[dict, int]:
+        """Create or update a vote from request data."""
+        vote = Vote.from_request(request, current_user.id)
+        vote_manager.delete(vote)
+        return {"message": "Successfully deleted!"}, 200
 
     @app.route("/api/thing", methods=["POST"])
     # @login_required

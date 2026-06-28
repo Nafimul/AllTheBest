@@ -1,8 +1,8 @@
-export async function postFormToApi(formData, url) {
+export async function sendFormToApi(formData, url, method) {
     try {
         const response = await fetch(url,
                                     {
-                                        method: 'POST',
+                                        method: method,
                                         body: formData
                                     });
         if (!response.ok)
@@ -19,6 +19,15 @@ export async function postVote(categoryName, thingName)
     const formData = new FormData();
     formData.append("categoryName", categoryName);
     formData.append("thingName", thingName);
-    const success = await postFormToApi(formData, "/api/vote");
+    const success = await sendFormToApi(formData, "/api/vote", "POST");
+    return success;
+}
+
+export async function deleteVote(categoryName)
+{
+    const formData = new FormData();
+    formData.append("categoryName", categoryName);
+    formData.append("thingName", "doesn't matter");
+    const success = await sendFormToApi(formData, "/api/vote", "DELETE");
     return success;
 }

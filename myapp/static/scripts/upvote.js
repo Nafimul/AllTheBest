@@ -1,5 +1,5 @@
 "use strict";
-import { postVote } from "./api.js";
+import { postVote, deleteVote } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     const upvoteButtons = Array.from(document.getElementsByClassName("upvote_button"));
@@ -41,15 +41,17 @@ document.addEventListener("DOMContentLoaded", function() {
         const src = arrowImg.getAttribute('src');
         const isSelecting = src.endsWith(unselectedImg);
 
+        let success = false
         if (isSelecting) {
             setCategoryArrows(categoryName, button);
+            success = await postVote(categoryName, thingName);
         } else {
             arrowImg.setAttribute('src', imgFolderPath + unselectedImg);
+            success = await deleteVote(categoryName);
         }
 
-        const success = await postVote(categoryName, thingName);
         if (!success) {
-            alert("error on our end adding vote! Maybe you're not logged in?");
+            alert("error on our end modifying vote! Maybe you're not logged in?");
             if (isSelecting) {
                 arrowImg.setAttribute('src', imgFolderPath + unselectedImg);
             } else {
