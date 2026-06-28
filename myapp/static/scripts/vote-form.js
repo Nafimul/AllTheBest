@@ -1,4 +1,5 @@
 "use strict";
+import { postFormToApi } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.forms.namedItem("addForm");
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
 
     function changeIsNegative(e) {
-        if (e.target.value === "Worst" || e.target.value === "Least")
+        if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")
             categoryIsNegativeEl.checked = true;
         else {
             categoryIsNegativeEl.checked = false;
@@ -37,9 +38,14 @@ document.addEventListener("DOMContentLoaded", function() {
         const formData = new FormData(form);
 
         const categoryNameWithoutPrefix = formData.get("categoryName").trim();
-        formData.set("categoryName", formData.get("categoryNamePrefix").trim() + " " + formData.get("categoryName").trim())
+        const categoryNamePrefix = formData.get("categoryNamePrefix").trim();
         const thingName = formData.get("thingName").trim();
-        const categoryName = formData.get("categoryName").trim()
+        const categoryName = categoryNamePrefix + " " + categoryNameWithoutPrefix;
+        formData.set("categoryName", categoryName);
+        formData.set("categoryNamePrefix", categoryNamePrefix);
+        formData.set("thingName", thingName);
+        if (formData.get("fromThing"))
+            formData.set("fromThing", formData.get("fromThing").trim());
 
         formMessage.innerText = "";
 
@@ -88,24 +94,6 @@ document.addEventListener("DOMContentLoaded", function() {
             formMessage.innerText = "Error!";
         
     }
-
-    async function postFormToApi(formData, url) {
-        try {
-            const response = await fetch(url,
-                                        {
-                                            method: 'POST',
-                                            body: formData
-                                        });
-            if (!response.ok)
-                return null;
-
-            return await response.json();
-        } catch (error) {
-            return null;
-        }
-    }
-
-
 
     form.addEventListener("submit", submit);
 });

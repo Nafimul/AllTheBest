@@ -1,4 +1,4 @@
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 
 class Category:
@@ -10,13 +10,17 @@ class Category:
         desc: Optional[str] = None,
         is_negative: bool = False,
     ) -> None:
-        if not isinstance(name, str):
-            raise TypeError("categoryName must be a string")
-        if not name.strip():
-            raise ValueError("categoryName is required and must be a non-empty string")
+        if (
+            (created_at and not isinstance(created_at, str))
+            or (not isinstance(is_spoiler, bool))
+            or (desc and not isinstance(desc, str))
+            or not isinstance(name, str)
+            or (not isinstance(is_negative, bool))
+        ):
+            raise TypeError()
 
         self.created_at = created_at
-        self.name = name.strip()
+        self.name = name
         self.is_spoiler = is_spoiler
         self.desc = desc
         self.is_negative = is_negative
@@ -45,11 +49,11 @@ class Category:
         category_name = request.form.get("categoryName")
         if not isinstance(category_name, str):
             raise TypeError("categoryName must be a string")
-        if not category_name.strip():
+        if not category_name:
             raise ValueError("categoryName is required")
 
         return cls(
-            name=category_name.strip(),
+            name=category_name,
             is_spoiler=bool(request.form.get("categoryIsSpoiler")),
             desc=request.form.get("categoryDesc"),
             is_negative=bool(request.form.get("categoryIsNegative")),

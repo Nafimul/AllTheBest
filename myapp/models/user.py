@@ -4,27 +4,25 @@ import flask_login
 
 
 class User(flask_login.UserMixin):
+    def __init__(self, id, name, email=None):
+        if (
+            (not isinstance(id, str))
+            or not isinstance(name, str)
+            or (email and not isinstance(email, str))
+        ):
+            raise TypeError()
+
+        self.id = id
+        self.name = name
+        self.email = email
+
     @classmethod
     def from_supabase_row_json(cls, data: Dict[str, Any]) -> "User":
-        user_id = data.get("id")
+        id = data.get("id")
         email = data.get("email")
         metadata = data.get("user_metadata")
-        name = None
-        if isinstance(metadata, dict):
-            name = metadata.get("name")
 
-        if not isinstance(user_id, str):
-            raise TypeError("User id in auth response must be a string")
-        if not user_id.strip():
-            raise ValueError("User id is missing in auth response")
-        if not isinstance(name, str):
-            raise TypeError("User name in auth response must be a string")
-        if not name.strip():
-            raise ValueError("User name is missing in auth response")
+        if not isinstance(metadata, dict) or not isinstance(metadata.get("name"), str):
+            raise TypeError()
 
-        user = cls()
-        user.id = user_id.strip()
-        if isinstance(email, str):
-            user.email = email.strip()
-        user.name = name.strip()
-        return user
+        return cls(id, metadata.get("name"), email)

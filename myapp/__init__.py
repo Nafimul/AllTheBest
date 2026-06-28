@@ -50,13 +50,13 @@ def create_app(env: str = "development") -> Flask:
     @app.errorhandler(ConnectionError)
     def handle_connection_error(e: ConnectionError):
         if env == "development":
-            app.logger.exception(e)
+            raise e
         return {"message": "Sorry. Connection issue on our end"}, 503
 
     @app.errorhandler(Exception)
     def handle_unexpected(e: Exception):
         if env == "development":
-            app.logger.exception(e)
+            raise e
         return {"message": "Sorry. Something went wrong on our end"}, 500
 
     @app.route("/")
@@ -79,8 +79,22 @@ def create_app(env: str = "development") -> Flask:
     @app.route("/categories")
     def list_categories() -> str:
         """Render the categories page with the current category list."""
-        categories = category_manager.get_categories()
-        return render_template("categories.html", categories=categories)
+        THINGS_TO_SHOW_PER_CATEGORY = 3
+        categories_with_scores = category_manager.get_categories_with_scores(
+            scores_per_category=THINGS_TO_SHOW_PER_CATEGORY
+        )
+        current_user_votes = []
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = {
+                vote.category_name: vote.thing_name
+                for vote in current_user_vote_objects
+            }
+        return render_template(
+            "categories.html",
+            categories_with_scores=categories_with_scores,
+            current_user_votes=current_user_votes,
+        )
 
     @app.route("/vote-form")
     # @login_required

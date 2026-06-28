@@ -1,12 +1,32 @@
 {% extends 'base.html' %}
 {% block title %}Categories{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/categories.js") }}'></script>
+{% endblock %}
 {% block content %}
-    {% if categories %}
-        <ul>
-        {% for category in categories %}
-            <li>{{ category.name }}</li>
+    {% if categories_with_scores %}
+        {% for key, value in categories_with_scores.items() %}
+            <article class="{{ 'negative' if key.is_negative else '' }}" id="{{ key.name }}">
+                <h2>{{ key.name }}</h2>
+                <ol type="1">
+                    {% for score in value %}
+                    <li id="{{ score.thing_name }}">
+                        <p> {{ score.thing_name }} </p>
+                        <p> {{ score.num_votes }} </p>
+                        <button class="upvote_button">
+                            <img
+                            src='{{ url_for("static", filename="assets/images/"
+                                + ("up_arrow_green.png" if
+                                key.name in current_user_votes and current_user_votes[key.name] == score.thing_name
+                                else "up_arrow_white.png")
+                                ) }}'
+                            width="10" height="10" class="upvote_img">
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </article>
         {% endfor %}
-        </ul>
     {% else %}
         <p>No categories found.</p>
     {% endif %}

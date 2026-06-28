@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Vote{% endblock %}
 {% block file_links %}
-    <script type='text/javascript' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
+    <script type='module' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
 {% endblock %}
 {% block content %}
     <form method="POST" id="addForm">
@@ -25,10 +25,10 @@
             <h3> Category </h3>
             <label for="categoryName"> Name </label>
             <select name="categoryNamePrefix" id="categoryNamePrefix">
-                <option value="Best">Best</option>
-                <option value="Worst">Worst</option>
-                <option value="Most">Most</option>
-                <option value="Least">Least</option>
+                <option value="FAVORITE">FAVORITE</option>
+                <option value="LEAST FAVORITE">LEAST FAVORITE</option>
+                <option value="MOST">MOST</option>
+                <option value="LEAST">LEAST</option>
                 <option value=""></option>
             </select>
             <input id="categoryName" name="categoryName" type="text" placeholder="identity reveal">

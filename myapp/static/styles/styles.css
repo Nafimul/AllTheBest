@@ -1,0 +1,14 @@
+article {
+    border: 1px solid black;
+}
+
+.negative {
+    color: red;
+}
+
+li {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+    align-items: center;
+}
