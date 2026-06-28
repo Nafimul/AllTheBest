@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
         const success = await postVote(categoryName, thingName);
         if (!success)
-            alert("error on our end adding vote! sorry!")
+            alert("error on our end adding vote! Maybe you're not logged in?")
     }
 
     Array.from(upvoteButtons).forEach(element => {

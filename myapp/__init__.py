@@ -79,7 +79,10 @@ def create_app(env: str = "development") -> Flask:
     @app.route("/categories")
     def list_categories() -> str:
         """Render the categories page with the current category list."""
-        categories_with_scores = category_manager.get_categories_with_scores()
+        THINGS_TO_SHOW_PER_CATEGORY = 3
+        categories_with_scores = category_manager.get_categories_with_scores(
+            scores_per_category=THINGS_TO_SHOW_PER_CATEGORY
+        )
         current_user_votes = []
         if current_user.is_authenticated:
             current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)

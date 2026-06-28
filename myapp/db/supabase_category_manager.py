@@ -49,7 +49,7 @@ class SupabaseCategoryManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
-    def get_categories_with_scores(self) -> List[Category]:
+    def get_categories_with_scores(self, scores_per_category) -> List[Category]:
         """Return all categories stored in Supabase
         with their corresponding things sorted from highest to lowest score."""
         try:
@@ -63,6 +63,9 @@ class SupabaseCategoryManager:
                 categories_with_scores[category].sort(
                     key=lambda score: score.num_votes, reverse=True
                 )
+                categories_with_scores[category] = categories_with_scores[category][
+                    :scores_per_category
+                ]
             return categories_with_scores
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
