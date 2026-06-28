@@ -21,11 +21,64 @@ from flask_login import (
     LoginManager,
 )
 from myapp.models.category import Category
+from myapp.models.score import Score
 from myapp.models.thing import Thing
 from myapp.models.user import User
 from myapp.models.vote import Vote
 
 
+# Return the ordinal suffix for a rank (e.g. 1 -> 'st', 2 -> 'nd', 3 -> 'rd').
+def _rank_suffix(rank: int) -> str:
+    if 11 <= (rank % 100) <= 13:
+        return "th"
+    if rank % 10 == 1:
+        return "st"
+    if rank % 10 == 2:
+        return "nd"
+    if rank % 10 == 3:
+        return "rd"
+    return "th"
+
+
+# Return the 1-based rank of the given score within its category score list.
+def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
+    return next(
+        (
+            index + 1
+            for index, item in enumerate(category_scores)
+            if item.thing_name == score.thing_name
+        ),
+        len(category_scores),
+    )
+
+
+# Build a list of score rows for a thing, sorted with first-place categories first.
+# name: thing name to filter on, scores: all category scores.
+def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
+    categories_by_name: dict[str, list[Score]] = {}
+    for score in scores:
+        categories_by_name.setdefault(score.category_name, []).append(score)
+
+    thing_scores: list[dict[str, Any]] = []
+    for score in filter(lambda s: s.thing_name == name, scores):
+        category_scores = sorted(
+            categories_by_name[score.category_name],
+            key=lambda item: item.num_votes,
+            reverse=True,
+        )
+        rank = _resolve_category_rank(score, category_scores)
+        thing_scores.append(
+            {
+                "category_name": score.category_name,
+                "num_votes": score.num_votes,
+                "rank_text": f"{rank}{_rank_suffix(rank)}",
+                "is_first": rank == 1,
+            }
+        )
+
+    return sorted(
+        thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"])
+    )
 def build_profile_vote_entries(
     votes: list[Vote], thing_manager: Any
 ) -> list[dict[str, Any]]:
@@ -116,6 +169,41 @@ def create_app(env: str = "development") -> Flask:
         """Render the vote submission form."""
         return render_template("vote-form.html")
 
+    @app.route("/things")
+    def list_things() -> str:
+        """Render a page with all things."""
+        things = thing_manager.get_things()
+        return render_template("things.html", things=things)
+
+    @app.route("/things/<string:name>", methods=["GET"])
+    def show_thing(name: str) -> str:
+        """Render a detailed page for a single thing."""
+        thing = thing_manager.get_thing(name)
+        if thing is None:
+            return render_template(
+                "thing.html",
+                thing=None,
+                thing_scores=[],
+                current_user_votes={},
+            )
+
+        scores = category_manager.get_scores()
+        thing_scores = _build_thing_scores(name, scores)
+
+        current_user_votes = {}
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = {
+                vote.category_name: vote.thing_name
+                for vote in current_user_vote_objects
+            }
+
+        return render_template(
+            "thing.html",
+            thing=thing,
+            thing_scores=thing_scores,
+            current_user_votes=current_user_votes,
+        )
     @app.route("/add-things")
     def add_things() -> str:
         """Render the thing submission page."""
@@ -136,6 +224,14 @@ def create_app(env: str = "development") -> Flask:
         vote = Vote.from_request(request, current_user.id)
         vote_manager.upsert(vote)
         return {"message": "Successfully added!"}, 200
+
+    @app.route("/api/vote", methods=["DELETE"])
+    @login_required
+    def delete_vote() -> tuple[dict, int]:
+        """Create or update a vote from request data."""
+        vote = Vote.from_request(request, current_user.id)
+        vote_manager.delete(vote)
+        return {"message": "Successfully deleted!"}, 200
 
     @app.route("/api/thing", methods=["POST"])
     # @login_required

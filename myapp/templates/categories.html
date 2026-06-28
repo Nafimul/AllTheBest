@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block title %}Categories{% endblock %}
 {% block file_links %}
-    <script type='module' src='{{ url_for("static", filename="scripts/categories.js") }}'></script>
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
 {% endblock %}
 {% block content %}
     {% if categories_with_scores %}
@@ -11,9 +11,11 @@
                 <ol type="1">
                     {% for score in value %}
                     <li id="{{ score.thing_name }}">
-                        <p> {{ score.thing_name }} </p>
-                        <p> {{ score.num_votes }} </p>
-                        <button class="upvote_button">
+                        <p>
+                            <a href="{{ url_for('show_thing', name=score.thing_name) }}">{{ score.thing_name }}</a>
+                        </p>
+                        <p class="vote-count">{{ score.num_votes }}</p>
+                        <button class="upvote_button" data-category="{{ key.name }}" data-thing="{{ score.thing_name }}">
                             <img
                             src='{{ url_for("static", filename="assets/images/"
                                 + ("up_arrow_green.png" if

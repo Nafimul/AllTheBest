@@ -1,6 +1,6 @@
 import io
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import httpx
 from PIL import Image
@@ -31,6 +31,17 @@ class SupabaseThingManager:
             if not response.data:
                 return None
             return Thing.from_json(response.data[0])
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get_things(self) -> List[Thing]:
+        """Return all things stored in Supabase."""
+        try:
+            response = self.supabase.table("things").select("*").execute()
+            things = []
+            for item in response.data:
+                things.append(Thing.from_json(item))
+            return things
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
