@@ -1,4 +1,4 @@
-import { postFormToApi } from "./api.js";
+import { sendFormToApi } from "./api.js";
 
 const attachedImages = new Map();
 let nextFormId = 1;
@@ -70,7 +70,7 @@ async function submitThingForm(form) {
         return;
     }
 
-    const result = await postFormToApi(formData, "/api/thing");
+    const result = await sendFormToApi(formData, "/api/thing", "POST");
     if (result) {
         message.textContent = `Successfully added ${thingName}.`;
         message.classList.remove("error-message");

@@ -31,7 +31,7 @@
                         {% for score in thing_scores %}
                             <tr data-category-name="{{ score.category_name }}">
                                 <td>{{ score.rank_text }}</td>
-                                <td>{{ score.category_name }}</td>
+                                <td><a href="{{ url_for('show_category', name=score.category_name) }}">{{ score.category_name }}</a></td>
                                 <td class="vote-count">{{ score.num_votes }}</td>
                                 <td>
                                     <button class="upvote_button" data-category="{{ score.category_name }}" data-thing="{{ thing.name }}">

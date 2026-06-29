@@ -1,5 +1,5 @@
 "use strict";
-import { postFormToApi } from "./api.js";
+import { sendFormToApi } from "./api.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.forms.namedItem("addForm");
@@ -66,17 +66,17 @@ document.addEventListener("DOMContentLoaded", function() {
         }
 
         if (isAddingThing) {
-            const result = await postFormToApi(formData, "/api/thing");
+            const result = await sendFormToApi(formData, "/api/thing", "POST");
             if (!result)
                 isSuccess = false;
         }
         if (isAddingCategory) {
-            const result = await postFormToApi(formData, "/api/category");
+            const result = await sendFormToApi(formData, "/api/category", "POST");
             if (!result)
                 isSuccess = false;
         }
         if (isAddingVote) {
-            const result = await postFormToApi(formData, "/api/vote");
+            const result = await sendFormToApi(formData, "/api/vote", "POST");
             if (!result)
                 isSuccess = false;
         }

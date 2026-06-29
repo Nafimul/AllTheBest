@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any, List, Optional
 import httpx
 
 from myapp.models.category import Category
@@ -18,6 +18,24 @@ class SupabaseCategoryManager:
             for item in response.data:
                 categories.append(Category.from_json(item))
             return categories
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get(self, name: str) -> Optional[Category]:
+        """Return a Category by name or None if not found."""
+        if not isinstance(name, str):
+            raise TypeError("name must be a string")
+
+        try:
+            response = (
+                self.supabase.table("categories")
+                .select("*")
+                .filter("name", "eq", name)
+                .execute()
+            )
+            if not response.data:
+                return None
+            return Category.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
