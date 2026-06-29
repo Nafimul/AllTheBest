@@ -7,7 +7,7 @@
     {% if categories_with_scores %}
         {% for key, value in categories_with_scores.items() %}
             <article class="{{ 'negative' if key.is_negative else '' }}" id="{{ key.name }}">
-                <h2>{{ key.name }}</h2>
+                <h2><a href="{{ url_for('show_category', name=key.name) }}">{{ key.name }}</a></h2>
                 <ol type="1">
                     {% for score in value %}
                     <li id="{{ score.thing_name }}">

@@ -79,6 +79,8 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
     return sorted(
         thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"])
     )
+
+
 def build_profile_vote_entries(
     votes: list[Vote], thing_manager: Any
 ) -> list[dict[str, Any]]:
@@ -175,6 +177,44 @@ def create_app(env: str = "development") -> Flask:
         things = thing_manager.get_things()
         return render_template("things.html", things=things)
 
+    @app.route("/categories/<string:name>", methods=["GET"])
+    def show_category(name: str) -> str:
+        """Render a detailed page for a single category with its leaderboard."""
+        category = category_manager.get(name)
+        if category is None:
+            return render_template("category.html", category=None, scores=[])
+
+        scores = category_manager.get_scores()
+        # filter and sort scores for this category by votes desc
+        scores_for_cat = list(filter(lambda s: s.category_name == name, scores))
+        scores_for_cat.sort(key=lambda s: s.num_votes, reverse=True)
+
+        rows = []
+        for idx, score in enumerate(scores_for_cat):
+            rank = idx + 1
+            rows.append(
+                {
+                    "thing_name": score.thing_name,
+                    "num_votes": score.num_votes,
+                    "rank_text": f"{rank}{_rank_suffix(rank)}",
+                }
+            )
+
+        current_user_votes = {}
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = {
+                vote.category_name: vote.thing_name
+                for vote in current_user_vote_objects
+            }
+
+        return render_template(
+            "category.html",
+            category=category,
+            scores=rows,
+            current_user_votes=current_user_votes,
+        )
+
     @app.route("/things/<string:name>", methods=["GET"])
     def show_thing(name: str) -> str:
         """Render a detailed page for a single thing."""
@@ -204,6 +244,7 @@ def create_app(env: str = "development") -> Flask:
             thing_scores=thing_scores,
             current_user_votes=current_user_votes,
         )
+
     @app.route("/add-things")
     def add_things() -> str:
         """Render the thing submission page."""
