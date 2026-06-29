@@ -60,6 +60,10 @@ class SupabaseThingManager:
             thing.img_path = self.get_img_path(thing.name)
 
         try:
+            # add from thing if does not exist yet
+            if thing.from_thing_name and self.get_thing(thing.from_thing_name) is None:
+                self.upsert_thing(Thing(thing.from_thing_name))
+
             row_json = thing.to_json()
             row_json.pop("created_at", None)
             response = self.supabase.table("things").upsert(row_json).execute()
