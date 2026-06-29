@@ -262,8 +262,9 @@ def create_app(env: str = "development") -> Flask:
     @login_required
     def upsert_vote() -> tuple[dict, int]:
         """Create or update a vote from request data."""
+        spoiler_for = (request.form.get("voteSpoilerFor"))
         vote = Vote.from_request(request, current_user.id)
-        vote_manager.upsert(vote)
+        vote_manager.upsert(vote, spoiler_for)
         return {"message": "Successfully added!"}, 200
 
     @app.route("/api/vote", methods=["DELETE"])
