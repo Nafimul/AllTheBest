@@ -29,7 +29,19 @@
                             <tr>
                                 <td>{{ row.rank_text }}</td>
                                 <td>
-                                    <a href="{{ url_for('show_thing', name=row.thing_name) }}">{{ row.thing_name }}</a>
+                                    {% if row.spoiler_for %}
+                                        <button
+                                            type="button"
+                                            class="spoiler-toggle"
+                                            data-spoiler-for="{{ row.spoiler_for }}"
+                                            data-thing-name="{{ row.thing_name }}"
+                                            data-link-target="{{ url_for('show_thing', name=row.thing_name) }}"
+                                        >
+                                            CLICK TO SEE SPOILER FOR {{ row.spoiler_for }}
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('show_thing', name=row.thing_name) }}">{{ row.thing_name }}</a>
+                                    {% endif %}
                                 </td>
                                 <td class="vote-count">{{ row.num_votes }}</td>
                                 <td>

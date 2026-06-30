@@ -9,14 +9,12 @@ class Vote:
         user_id: str,
         thing_name: str,
         category_name: str,
-        spoiler_for: Optional[str] = None,
         comment: Optional[str] = None,
         created_at: Optional[str] = None,
         is_favorite: bool = False,
     ) -> None:
         if (
-            (spoiler_for and not isinstance(spoiler_for, str))
-            or (not isinstance(user_id, str))
+            (not isinstance(user_id, str))
             or (not isinstance(thing_name, str))
             or (not isinstance(category_name, str))
             or (comment and not isinstance(comment, str))
@@ -28,7 +26,6 @@ class Vote:
         self.user_id = user_id
         self.thing_name = thing_name
         self.category_name = category_name
-        self.spoiler_for = spoiler_for
         self.comment = comment
         self.created_at = created_at
         self.is_favorite = is_favorite
@@ -40,7 +37,6 @@ class Vote:
             user_id=str(data.get("user_id")),
             thing_name=str(data.get("thing_name")),
             category_name=str(data.get("category_name")),
-            spoiler_for=data.get("spoiler_for"),
             comment=data.get("comment"),
             is_favorite=bool(data.get("is_favorite", False)),
         )
@@ -51,7 +47,6 @@ class Vote:
             "user_id": self.user_id,
             "thing_name": self.thing_name,
             "category_name": self.category_name,
-            "spoiler_for": self.spoiler_for,
             "comment": self.comment,
             "is_favorite": self.is_favorite,
         }
@@ -67,7 +62,6 @@ class Vote:
             category_name=request.form.get("categoryName"),
             user_id=user_id,
             thing_name=request.form.get("thingName"),
-            spoiler_for=request.form.get("voteSpoilerFor"),
             comment=request.form.get("voteComment"),
             is_favorite=bool(request.form.get("voteIsFavorite")),
         )

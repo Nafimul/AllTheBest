@@ -25,11 +25,25 @@ class ProfileVoteEntriesTests(unittest.TestCase):
         ]
 
         entries = build_profile_vote_entries(votes, DummyThingManager())
-
         self.assertEqual(entries[0]["vote"].thing_name, "Coffee")
         self.assertTrue(entries[0]["vote"].is_favorite)
         self.assertEqual(entries[0]["thing"].img_path, "/images/coffee.jpg")
         self.assertEqual(entries[1]["vote"].thing_name, "Tea")
+
+    def test_spoiler_metadata_is_included_for_matching_votes(self) -> None:
+        votes = [
+            Vote(user_id="user-1", thing_name="Coffee", category_name="Drinks"),
+        ]
+        spoiler_for_by_thing = {"Coffee": "The Matrix"}
+
+        entries = build_profile_vote_entries(
+            votes,
+            DummyThingManager(),
+            spoiler_for_by_thing=spoiler_for_by_thing,
+        )
+
+        self.assertEqual(entries[0]["spoiler_for"], "The Matrix")
+        self.assertTrue(entries[0]["is_spoiler"])
 
 
 if __name__ == "__main__":
