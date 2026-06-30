@@ -7,36 +7,52 @@
   <ul class="profile-votes">
     {% for entry in profile_votes %}
       <li class="profile-vote-card{% if entry.vote.is_favorite %} favorite{% endif %}">
-        {% if entry.thing and entry.thing.img_path %}
-          <img class="profile-vote-image{% if entry.is_spoiler %} spoiler-image{% endif %}" src="{{ entry.thing.img_path }}" alt="{{ entry.vote.thing_name }}">
-        {% else %}
-          <div class="profile-vote-image placeholder{% if entry.is_spoiler %} spoiler-image{% endif %}">No image</div>
-        {% endif %}
-        <div>
-          <p>
-            {% if entry.is_spoiler %}
-              <button
-                type="button"
-                class="spoiler-toggle"
-                data-spoiler-for="{{ entry.spoiler_for }}"
-                data-thing-name="{{ entry.vote.thing_name }}"
-                data-link-target="{{ url_for('show_thing', name=entry.vote.thing_name) }}"
-              >
-                CLICK TO SEE SPOILER FOR {{ entry.spoiler_for }}
-              </button>
-            {% else %}
-              <strong>{{ entry.vote.thing_name }}</strong>
-            {% endif %}
-          </p>
-          <p>Category: {{ entry.vote.category_name }}</p>
-          {% if entry.vote.is_favorite %}
-            <p>Favorite vote</p>
+        <a href="{{ url_for('show_vote', user_id=entry.vote.user_id, category_name=entry.vote.category_name, thing_name=entry.vote.thing_name) }}" class="vote-link">
+          {% if entry.thing and entry.thing.img_path %}
+            <img class="profile-vote-image{% if entry.is_spoiler %} spoiler-image{% endif %}" src="{{ entry.thing.img_path }}" alt="{{ entry.vote.thing_name }}">
+          {% else %}
+            <div class="profile-vote-image placeholder{% if entry.is_spoiler %} spoiler-image{% endif %}">No image</div>
           {% endif %}
-        </div>
+          <div>
+            <p>
+              {% if entry.is_spoiler %}
+                <button
+                  type="button"
+                  class="spoiler-toggle"
+                  data-spoiler-for="{{ entry.spoiler_for }}"
+                  data-thing-name="{{ entry.vote.thing_name }}"
+                  data-link-target="{{ url_for('show_thing', name=entry.vote.thing_name) }}"
+                >
+                  CLICK TO SEE SPOILER FOR {{ entry.spoiler_for }}
+                </button>
+              {% else %}
+                <strong>{{ entry.vote.thing_name }}</strong>
+              {% endif %}
+            </p>
+            <p>Category: {{ entry.vote.category_name }}</p>
+            {% if entry.vote.is_favorite %}
+              <p>Favorite vote</p>
+            {% endif %}
+          </div>
+        </a>
       </li>
     {% endfor %}
   </ul>
 {% else %}
   <p>No votes yet.</p>
 {% endif %}
+
+<style>
+  .vote-link {
+    text-decoration: none;
+    color: inherit;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+  }
+
+  .vote-link:hover {
+    opacity: 0.8;
+  }
+</style>
 {% endblock %}

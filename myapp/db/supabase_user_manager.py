@@ -91,7 +91,6 @@ class SupabaseUserManager:
             )
             if response is None:
                 return None
-
             return Profile.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
