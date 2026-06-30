@@ -52,6 +52,15 @@ def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
     )
 
 
+def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[str, str]:
+    """Return a mapping of thing names to spoiler labels for marked scores."""
+    spoiler_for_by_thing: dict[str, str] = {}
+    for score in scores:
+        if score.spoiler_for:
+            spoiler_for_by_thing[score.thing_name] = score.spoiler_for
+    return spoiler_for_by_thing
+
+
 # Build a list of score rows for a thing, sorted with first-place categories first.
 # name: thing name to filter on, scores: all category scores.
 def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
@@ -82,16 +91,27 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
 
 
 def build_profile_vote_entries(
-    votes: list[Vote], thing_manager: Any
+    votes: list[Vote],
+    thing_manager: Any,
+    spoiler_for_by_thing: Optional[dict[str, str]] = None,
 ) -> list[dict[str, Any]]:
     """Return vote entries sorted with favorite votes first and enriched with thing data."""
     sorted_votes = sorted(votes, key=lambda vote: vote.is_favorite, reverse=True)
     entries = []
+    spoiler_lookup = spoiler_for_by_thing or {}
     for vote in sorted_votes:
         thing = None
         if thing_manager is not None:
             thing = thing_manager.get_thing(vote.thing_name)
-        entries.append({"vote": vote, "thing": thing})
+        spoiler_for = spoiler_lookup.get(vote.thing_name)
+        entries.append(
+            {
+                "vote": vote,
+                "thing": thing,
+                "spoiler_for": spoiler_for,
+                "is_spoiler": bool(spoiler_for),
+            }
+        )
     return entries
 
 
@@ -197,6 +217,7 @@ def create_app(env: str = "development") -> Flask:
                     "thing_name": score.thing_name,
                     "num_votes": score.num_votes,
                     "rank_text": f"{rank}{_rank_suffix(rank)}",
+                    "spoiler_for": score.spoiler_for,
                 }
             )
 
@@ -262,7 +283,7 @@ def create_app(env: str = "development") -> Flask:
     @login_required
     def upsert_vote() -> tuple[dict, int]:
         """Create or update a vote from request data."""
-        spoiler_for = (request.form.get("voteSpoilerFor"))
+        spoiler_for = request.form.get("voteSpoilerFor")
         vote = Vote.from_request(request, current_user.id)
         vote_manager.upsert(vote, spoiler_for)
         return {"message": "Successfully added!"}, 200
@@ -331,7 +352,14 @@ def create_app(env: str = "development") -> Flask:
         profile_votes = []
         if current_user.is_authenticated:
             user_votes = vote_manager.get_by_user_id(current_user.id)
-            profile_votes = build_profile_vote_entries(user_votes, thing_manager)
+            spoiler_for_by_thing = _build_spoiler_for_by_thing(
+                category_manager.get_scores()
+            )
+            profile_votes = build_profile_vote_entries(
+                user_votes,
+                thing_manager,
+                spoiler_for_by_thing=spoiler_for_by_thing,
+            )
 
         return render_template(
             "profile.html",
