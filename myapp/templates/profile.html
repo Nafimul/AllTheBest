@@ -7,11 +7,13 @@
   <ul class="profile-votes">
     {% for entry in profile_votes %}
       <li class="profile-vote-card{% if entry.vote.is_favorite %} favorite{% endif %}">
-        {% if entry.thing and entry.thing.img_path %}
-          <img class="profile-vote-image{% if entry.is_spoiler %} spoiler-image{% endif %}" src="{{ entry.thing.img_path }}" alt="{{ entry.vote.thing_name }}">
-        {% else %}
-          <div class="profile-vote-image placeholder{% if entry.is_spoiler %} spoiler-image{% endif %}">No image</div>
-        {% endif %}
+        <a href="{{ url_for('show_vote', category_name=entry.vote.category_name, thing_name=entry.vote.thing_name, user_id=entry.vote.user_id) }}">
+          {% if entry.thing and entry.thing.img_path %}
+            <img class="profile-vote-image{% if entry.is_spoiler %} spoiler-image{% endif %}" src="{{ entry.thing.img_path }}" alt="{{ entry.vote.thing_name }}">
+          {% else %}
+            <div class="profile-vote-image placeholder{% if entry.is_spoiler %} spoiler-image{% endif %}">No image</div>
+          {% endif %}
+        </a>
         <div>
           <p>
             {% if entry.is_spoiler %}
@@ -25,10 +27,14 @@
                 CLICK TO SEE SPOILER FOR {{ entry.spoiler_for }}
               </button>
             {% else %}
-              <strong>{{ entry.vote.thing_name }}</strong>
+              <a href="{{ url_for('show_thing', name=entry.vote.thing_name) }}">
+                {{ entry.vote.thing_name }}
+              </a>
             {% endif %}
           </p>
-          <p>Category: {{ entry.vote.category_name }}</p>
+          <a href="{{ url_for('show_category', name=entry.vote.category_name) }}">
+            {{ entry.vote.category_name }}
+          </a>
           {% if entry.vote.is_favorite %}
             <p>Favorite vote</p>
           {% endif %}

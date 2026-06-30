@@ -38,6 +38,25 @@ class SupabaseVoteManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def get_vote(
+        self, user_id: str, category_name: str, thing_name: str
+    ) -> Optional[Vote]:
+        """Return a specific vote by user_id, category_name, and thing_name."""
+        try:
+            response = (
+                self.supabase.table("votes")
+                .select("*")
+                .filter("user_id", "eq", user_id)
+                .filter("category_name", "eq", category_name)
+                .filter("thing_name", "eq", thing_name)
+                .execute()
+            )
+            if response.data:
+                return Vote.from_json(response.data[0])
+            return None
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def upsert(self, vote: Vote, spoiler_for: Optional[str]) -> Vote:
         """Insert or update a vote record."""
         if not isinstance(vote, Vote):

@@ -4,6 +4,7 @@ import httpx
 from supabase import AuthError
 
 from myapp.errors.authentication_error import AuthenticationError
+from myapp.models.profile import Profile
 from myapp.models.user import User
 
 
@@ -73,5 +74,23 @@ class SupabaseUserManager:
 
             data = response.model_dump()
             return User.from_supabase_row_json(data["user"])
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get_profile_by_id(self, user_id: str) -> Optional[User]:
+        """Return a profile by their ID, or None if not found."""
+        if not isinstance(user_id, str):
+            raise TypeError("user_id must be a string")
+
+        try:
+            response = (
+                self.supabase.table("profiles")
+                .select("*")
+                .filter("user_id", "eq", user_id)
+                .execute()
+            )
+            if response is None:
+                return None
+            return Profile.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e

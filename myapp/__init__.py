@@ -351,20 +351,74 @@ def create_app(env: str = "development") -> Flask:
         """Render the current user's profile with their vote history."""
         profile_votes = []
         if current_user.is_authenticated:
-            user_votes = vote_manager.get_by_user_id(current_user.id)
-            spoiler_for_by_thing = _build_spoiler_for_by_thing(
-                category_manager.get_scores()
-            )
-            profile_votes = build_profile_vote_entries(
-                user_votes,
-                thing_manager,
-                spoiler_for_by_thing=spoiler_for_by_thing,
-            )
+            return profile_by_id(current_user.id)
+
+        return render_template(
+            "login.html",
+        )
+
+    @app.route("/profile/<string:id>", methods=["GET"])
+    def profile_by_id(id: str) -> str:
+        """Render the current user's profile with their vote history."""
+        user = user_manager.get_profile_by_id(id)
+        user_votes = vote_manager.get_by_user_id(id)
+
+        spoiler_for_by_thing = _build_spoiler_for_by_thing(
+            category_manager.get_scores()
+        )
+
+        profile_votes = []
+        profile_votes = build_profile_vote_entries(
+            user_votes,
+            thing_manager,
+            spoiler_for_by_thing=spoiler_for_by_thing,
+        )
 
         return render_template(
             "profile.html",
-            user=current_user,
+            user=user,
             profile_votes=profile_votes,
+        )
+
+    @app.route("/votes/<user_id>/<category_name>/<thing_name>", methods=["GET"])
+    def show_vote(user_id: str, category_name: str, thing_name: str) -> str:
+        """Render a detailed page for a single vote."""
+        vote = vote_manager.get_vote(user_id, category_name, thing_name)
+
+        if vote is None:
+            return render_template("vote.html", vote=None)
+
+        # Get voter information
+        voter_name = "Unknown User"
+        try:
+            voter = user_manager.get_profile_by_id(user_id)
+            if voter:
+                voter_name = voter.name
+        except ConnectionError:
+            pass
+
+        # Get thing information
+        thing = None
+        try:
+            thing = thing_manager.get_thing(thing_name)
+        except ConnectionError:
+            pass
+
+        # Check if this is a spoiler vote
+        spoiler_for_by_thing = _build_spoiler_for_by_thing(
+            category_manager.get_scores()
+        )
+        spoiler_for = spoiler_for_by_thing.get(thing_name)
+        is_spoiler = bool(spoiler_for)
+
+        return render_template(
+            "vote.html",
+            vote=vote,
+            voter_name=voter_name,
+            voter_user_id=user_id,
+            thing=thing,
+            is_spoiler=is_spoiler,
+            spoiler_for=spoiler_for,
         )
 
     return app
