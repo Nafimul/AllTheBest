@@ -45,6 +45,27 @@ class SupabaseThingManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def add_from_things(self, thing_name: str, from_thing_names: List[str]) -> None:
+        if (not isinstance(thing_name, str)) or (
+            not isinstance(from_thing_names, List)
+        ):
+            raise TypeError()
+
+        try:
+            for from_thing_name in from_thing_names:
+                response = (
+                    self.supabase.table("from_things")
+                    .upsert(
+                        {
+                            "thing_name": thing_name,
+                            "from_thing_name": from_thing_name,
+                        }
+                    )
+                    .execute()
+                )
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def upsert_thing(
         self, thing: Thing, img_file: Optional[FileStorage] = None
     ) -> Thing:
@@ -60,10 +81,6 @@ class SupabaseThingManager:
             thing.img_path = self.get_img_path(thing.name)
 
         try:
-            # add from thing if does not exist yet
-            if thing.from_thing_name and self.get_thing(thing.from_thing_name) is None:
-                self.upsert_thing(Thing(thing.from_thing_name))
-
             row_json = thing.to_json()
             row_json.pop("created_at", None)
             response = self.supabase.table("things").upsert(row_json).execute()

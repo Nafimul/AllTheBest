@@ -302,7 +302,14 @@ def create_app(env: str = "development") -> Flask:
         """Create or update a thing with optional image upload."""
         img_file = request.files.get("thingImage")
         thing = Thing.from_request(request)
-        thing_manager.upsert_thing(thing, img_file)
+
+        thing_manager.upsert_thing(
+            thing,
+            img_file,
+        )
+        thing_manager.add_from_things(
+            thing.name, request.form.getlist("fromThingNames")
+        )
         return {"message": "Success!"}, 200
 
     @app.route("/login", methods=["GET", "POST"])

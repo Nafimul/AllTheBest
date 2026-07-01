@@ -9,6 +9,13 @@ document.addEventListener("DOMContentLoaded", function() {
     const imagePreview = document.getElementById("imagePreview");
     const categoryIsNegativeEl = document.getElementById("categoryIsNegative");
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
+    const fromThingInput = document.getElementById("fromThingNames");
+    const addFromThingButton = document.getElementById("fromThingButton");
+
+    categoryNamePrefixEl.addEventListener("change", changeIsNegative);
+    thingImage.addEventListener("change", previewImage);
+    form.addEventListener("submit", submit);
+    addFromThingButton.addEventListener("click", addFromThingInput)
 
     function changeIsNegative(e) {
         if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")
@@ -17,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
             categoryIsNegativeEl.checked = false;
         }
     }
-    categoryNamePrefixEl.addEventListener("change", changeIsNegative);
 
     function previewImage(e) {
         const file = e.target.files[0];
@@ -31,21 +37,35 @@ document.addEventListener("DOMContentLoaded", function() {
             imagePreview.src = "";
         }
     }
-    thingImage.addEventListener("change", previewImage);
+
+    function addFromThingInput(e) {
+        const clone = fromThingInput.cloneNode(false);
+        clone.value = ""
+        clone.id = null
+        fromThingInput.parentElement.appendChild(clone);
+    }
+
+    function removeEmptyFromThingNames(formData) {
+        let fromThingNames = formData.getAll("fromThingNames");
+        fromThingNames = fromThingNames.filter(name => String(name) !== "");
+        formData.delete("fromThingNames");
+        fromThingNames.forEach(name => {
+            formData.append("fromThingNames", name);
+        });
+    }
 
     async function submit(e) {
         e.preventDefault();
         const formData = new FormData(form);
 
-        const categoryNameWithoutPrefix = formData.get("categoryName").trim();
-        const categoryNamePrefix = formData.get("categoryNamePrefix").trim();
-        const thingName = formData.get("thingName").trim();
+        const categoryNameWithoutPrefix = formData.get("categoryName");
+        const categoryNamePrefix = formData.get("categoryNamePrefix");
+        const thingName = formData.get("thingName");
         const categoryName = categoryNamePrefix + " " + categoryNameWithoutPrefix;
         formData.set("categoryName", categoryName);
         formData.set("categoryNamePrefix", categoryNamePrefix);
         formData.set("thingName", thingName);
-        if (formData.get("fromThing"))
-            formData.set("fromThing", formData.get("fromThing").trim());
+        removeEmptyFromThingNames(formData);
 
         formMessage.innerText = "";
 
@@ -92,8 +112,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         else
             formMessage.innerText = "Error!";
-        
     }
 
-    form.addEventListener("submit", submit);
 });
