@@ -1,7 +1,24 @@
 import { sendFormToApi } from "./api.js";
+import { addFromThingInput, removeEmptyFromThingNames } from "./vote-form.js";
 
 const attachedImages = new Map();
 let nextFormId = 1;
+
+function populateFromThingInputs(form, values = []) {
+    const inputs = Array.from(form.querySelectorAll("input[name='fromThingNames']"));
+    inputs.forEach((input, index) => {
+        input.value = values[index] || "";
+    });
+
+    values.slice(inputs.length).forEach((value) => {
+        const lastInput = form.querySelector("input[name='fromThingNames']:last-of-type");
+        if (!lastInput) {
+            return;
+        }
+        const newInput = addFromThingInput(lastInput);
+        newInput.value = value;
+    });
+}
 
 function createForm(initialData = {}, imageFile = null) {
     const formsContainer = document.getElementById("formsContainer");
@@ -12,13 +29,19 @@ function createForm(initialData = {}, imageFile = null) {
     form.dataset.formId = formId;
 
     const thingNameInput = form.querySelector("input[name=thingName]");
-    const fromThingInput = form.querySelector("input[name=fromThingName]");
+    const fromThingInput = form.querySelector("input[name='fromThingNames']");
+    const addFromThingButton = form.querySelector(".add-from-thing-button");
     const fileInput = form.querySelector("input[name=thingImage]");
     const preview = form.querySelector(".imagePreview");
     const message = form.querySelector(".formMessage");
 
     thingNameInput.value = initialData.thingName || "";
-    fromThingInput.value = initialData.fromThingName || "";
+    const initialFromThingNames = Array.isArray(initialData.fromThingNames)
+        ? initialData.fromThingNames
+        : initialData.fromThingName
+            ? [initialData.fromThingName]
+            : [];
+    populateFromThingInputs(form, initialFromThingNames);
 
     function updatePreview(file) {
         if (!file) {
@@ -30,6 +53,10 @@ function createForm(initialData = {}, imageFile = null) {
         attachedImages.set(formId, file);
         preview.src = URL.createObjectURL(file);
         preview.style.display = "block";
+    }
+
+    if (addFromThingButton && fromThingInput) {
+        addFromThingButton.addEventListener("click", () => addFromThingInput(fromThingInput));
     }
 
     fileInput.addEventListener("change", (event) => {
@@ -58,6 +85,7 @@ async function submitThingForm(form) {
     message.textContent = "";
 
     const formData = new FormData(form);
+    removeEmptyFromThingNames(formData);
     if (attachedImages.has(formId)) {
         formData.set("thingImage", attachedImages.get(formId));
     }
@@ -92,7 +120,7 @@ function duplicateCurrentForm() {
 
     const values = {
         thingName: lastForm.querySelector("input[name=thingName]").value,
-        fromThingName: lastForm.querySelector("input[name=fromThingName]").value,
+        fromThingNames: Array.from(lastForm.querySelectorAll("input[name='fromThingNames']")).map((input) => input.value),
     };
     const formId = lastForm.dataset.formId;
     const imageFile = attachedImages.get(formId) || null;
