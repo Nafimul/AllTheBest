@@ -185,6 +185,15 @@ def create_app(env: str = "development") -> Flask:
             current_user_votes=current_user_votes,
         )
 
+    @app.route("/users")
+    def list_users() -> str:
+        """Render the categories page with the current users list."""
+        profiles = user_manager.get_profiles()
+        return render_template(
+            "users.html",
+            profiles=profiles,
+        )
+
     @app.route("/vote-form")
     # @login_required
     def vote_form() -> str:
