@@ -156,3 +156,25 @@ class SupabaseThingManager:
             return image_url
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
+
+    def get_children(self, parent_name: str) -> list[str]:
+        """Return the list of thing names that declare they are from `parent_name`.
+
+        Example: if Green Goblin has a row with from_thing_name = "Spider-Man (2002)",
+        then get_children("Spider-Man (2002)") will include "Green Goblin".
+        """
+        if not isinstance(parent_name, str):
+            raise TypeError("parent_name must be a string")
+
+        try:
+            response = (
+                self.supabase.table("from_things")
+                .select("*")
+                .filter("from_thing_name", "eq", parent_name)
+                .execute()
+            )
+            if not response.data:
+                return []
+            return [item.get("thing_name") for item in response.data]
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
