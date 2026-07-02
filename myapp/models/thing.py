@@ -1,17 +1,15 @@
 from typing import Any, Dict, Optional
-
+from flask import json
 
 class Thing:
     def __init__(
         self,
         name: str,
-        from_thing_name: Optional[str] = None,
         created_at: Optional[str] = None,
         img_path: Optional[str] = None,
     ) -> None:
         if (
-            (from_thing_name and not isinstance(from_thing_name, str))
-            or (not isinstance(name, str))
+            (not isinstance(name, str))
             or (created_at and not isinstance(created_at, str))
             or (img_path and not isinstance(img_path, str))
         ):
@@ -20,28 +18,19 @@ class Thing:
         self.created_at = created_at
         self.name = name
         self.img_path = img_path
-        self.from_thing_name = from_thing_name
 
     def __str__(self):
-        return (
-            f"Thing("
-            f"name='{self.name}', "
-            f"from_thing_name='{self.from_thing_name}', "
-            f"created_at='{self.created_at}', "
-            f"img_path='{self.img_path}'"
-            f")"
-        )
+        return json.dumps(self.to_json())
+
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Thing":
         name = data.get("name")
-        from_thing_name = data.get("from_thing_name")
         img_path = data.get("img_path")
         created_at = data.get("created_at")
 
         return cls(
             name=name,
-            from_thing_name=from_thing_name,
             created_at=created_at,
             img_path=img_path,
         )
@@ -49,7 +38,6 @@ class Thing:
     def to_json(self) -> Dict[str, Any]:
         return {
             "name": self.name,
-            "from_thing_name": self.from_thing_name,
             "created_at": self.created_at,
             "img_path": self.img_path,
         }
@@ -62,8 +50,4 @@ class Thing:
         if not thing_name:
             raise ValueError("thingName is required")
 
-        from_thing_name = request.form.get("fromThingName")
-        if isinstance(from_thing_name, str) and not from_thing_name:
-            from_thing_name = None
-
-        return cls(name=thing_name, from_thing_name=from_thing_name)
+        return cls(name=thing_name)

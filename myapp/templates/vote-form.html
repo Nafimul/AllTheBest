@@ -13,8 +13,12 @@
             <label for="thingName"> Name </label>
             <input id="thingName" name="thingName" type="text" placeholder="Darth Vader">
 
-            <label for="fromThingName"> From </label>
-            <input id="fromThingName" name="fromThingName" type="text" placeholder="Star Wars">
+            <div id="fromThings">
+                <button type="button" id="fromThingButton"> Add From Thing </button>
+                <label for="fromThingNames:"> From </label>
+                <input id="fromThingNames" name="fromThingNames" type="text" placeholder="Star Wars">
+                <input name="fromThingNames" type="text" placeholder="David Prowse (Actor)">
+            </div>
 
             <label for="thingImage"> Image </label>
             <input id="thingImage" name="thingImage" type="file" accept="image/*">
