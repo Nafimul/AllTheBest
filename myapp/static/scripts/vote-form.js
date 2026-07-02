@@ -32,16 +32,10 @@ document.addEventListener("DOMContentLoaded", function() {
     const fromThingInput = document.getElementById("fromThingNames");
     const addFromThingButton = document.getElementById("fromThingButton");
 
-    if (categoryNamePrefixEl) {
-        categoryNamePrefixEl.addEventListener("change", changeIsNegative);
-    }
-    if (thingImage) {
-        thingImage.addEventListener("change", previewImage);
-    }
+    categoryNamePrefixEl.addEventListener("change", changeIsNegative);
+    thingImage.addEventListener("change", previewImage);
     form.addEventListener("submit", submit);
-    if (addFromThingButton && fromThingInput) {
-        addFromThingButton.addEventListener("click", () => addFromThingInput(fromThingInput));
-    }
+    addFromThingButton.addEventListener("click", addFromThingInput)
 
     function changeIsNegative(e) {
         if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")

@@ -1,6 +1,6 @@
 import unittest
 
-from myapp import build_profile_vote_entries
+from myapp import build_current_user_votes, build_profile_vote_entries
 from myapp.models.thing import Thing
 from myapp.models.vote import Vote
 
@@ -44,6 +44,21 @@ class ProfileVoteEntriesTests(unittest.TestCase):
 
         self.assertEqual(entries[0]["spoiler_for"], "The Matrix")
         self.assertTrue(entries[0]["is_spoiler"])
+
+    def test_current_user_votes_are_collected_by_category(self) -> None:
+        votes = [
+            Vote(user_id="user-1", thing_name="Tea", category_name="Drinks"),
+            Vote(
+                user_id="user-1",
+                thing_name="Coffee",
+                category_name="Food",
+                is_favorite=True,
+            ),
+        ]
+
+        current_user_votes = build_current_user_votes(votes)
+
+        self.assertEqual(current_user_votes, {"Drinks": "Tea", "Food": "Coffee"})
 
 
 if __name__ == "__main__":

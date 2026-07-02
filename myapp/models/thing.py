@@ -1,5 +1,5 @@
 from typing import Any, Dict, Optional
-
+from flask import json
 
 class Thing:
     def __init__(
@@ -20,13 +20,8 @@ class Thing:
         self.img_path = img_path
 
     def __str__(self):
-        return (
-            f"Thing("
-            f"name='{self.name}', "
-            f"created_at='{self.created_at}', "
-            f"img_path='{self.img_path}'"
-            f")"
-        )
+        return json.dumps(self.to_json())
+
 
     @classmethod
     def from_json(cls, data: Dict[str, Any]) -> "Thing":
