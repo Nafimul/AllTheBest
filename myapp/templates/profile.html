@@ -1,5 +1,8 @@
 {% extends 'base.html' %}
 {% block title %} {{ user.name }}'s Profile {% endblock %}
+{% block file_links %}
+  <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
 {% block content %}
 <h1>{{ user.name }}'s Profile</h1>
 
@@ -35,6 +38,21 @@
           <a href="{{ url_for('show_category', name=entry.vote.category_name) }}">
             {{ entry.vote.category_name }}
           </a>
+          <button
+            class="upvote_button"
+            data-category="{{ entry.vote.category_name }}"
+            data-thing="{{ entry.vote.thing_name }}"
+            type="button"
+          >
+            <img
+              src='{{ url_for("static", filename="assets/images/"
+                  + ("up_arrow_green.png" if entry.vote.category_name in current_user_votes and current_user_votes[entry.vote.category_name] == entry.vote.thing_name else "up_arrow_white.png")
+                  ) }}'
+              width="10"
+              height="10"
+              class="upvote_img"
+            >
+          </button>
           {% if entry.vote.is_favorite %}
             <p>Favorite vote</p>
           {% endif %}

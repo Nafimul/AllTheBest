@@ -90,6 +90,11 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
     )
 
 
+def build_current_user_votes(votes: list[Vote]) -> dict[str, str]:
+    """Return a mapping of category names to the thing currently voted for."""
+    return {vote.category_name: vote.thing_name for vote in votes}
+
+
 def build_profile_vote_entries(
     votes: list[Vote],
     thing_manager: Any,
@@ -175,10 +180,7 @@ def create_app(env: str = "development") -> Flask:
         current_user_votes = []
         if current_user.is_authenticated:
             current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = {
-                vote.category_name: vote.thing_name
-                for vote in current_user_vote_objects
-            }
+            current_user_votes = build_current_user_votes(current_user_vote_objects)
         return render_template(
             "categories.html",
             categories_with_scores=categories_with_scores,
@@ -224,10 +226,7 @@ def create_app(env: str = "development") -> Flask:
         current_user_votes = {}
         if current_user.is_authenticated:
             current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = {
-                vote.category_name: vote.thing_name
-                for vote in current_user_vote_objects
-            }
+            current_user_votes = build_current_user_votes(current_user_vote_objects)
 
         return render_template(
             "category.html",
@@ -254,10 +253,7 @@ def create_app(env: str = "development") -> Flask:
         current_user_votes = {}
         if current_user.is_authenticated:
             current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = {
-                vote.category_name: vote.thing_name
-                for vote in current_user_vote_objects
-            }
+            current_user_votes = build_current_user_votes(current_user_vote_objects)
 
         return render_template(
             "thing.html",
@@ -370,6 +366,11 @@ def create_app(env: str = "development") -> Flask:
         user = user_manager.get_profile_by_id(id)
         user_votes = vote_manager.get_by_user_id(id)
 
+        current_user_votes = {}
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = build_current_user_votes(current_user_vote_objects)
+
         spoiler_for_by_thing = _build_spoiler_for_by_thing(
             category_manager.get_scores()
         )
@@ -385,6 +386,7 @@ def create_app(env: str = "development") -> Flask:
             "profile.html",
             user=user,
             profile_votes=profile_votes,
+            current_user_votes=current_user_votes,
         )
 
     @app.route("/votes/<user_id>/<category_name>/<thing_name>", methods=["GET"])
