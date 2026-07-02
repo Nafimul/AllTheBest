@@ -1,10 +1,30 @@
 "use strict";
 import { sendFormToApi } from "./api.js";
 
+export function addFromThingInput(inputEl) {
+    const clone = inputEl.cloneNode(false);
+    clone.value = "";
+    clone.id = null;
+    inputEl.parentElement.appendChild(clone);
+    return clone;
+}
+
+export function removeEmptyFromThingNames(formData, fieldName = "fromThingNames") {
+    let fromThingNames = formData.getAll(fieldName);
+    fromThingNames = fromThingNames.filter((name) => String(name).trim() !== "");
+    formData.delete(fieldName);
+    fromThingNames.forEach((name) => {
+        formData.append(fieldName, name);
+    });
+}
+
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.forms.namedItem("addForm");
+    if (!form) {
+        return;
+    }
+
     const formMessage = document.getElementById("formMessage");
-    const successMessage = document.getElementById("successMessage");
     const thingImage = document.getElementById("thingImage");
     const imagePreview = document.getElementById("imagePreview");
     const categoryIsNegativeEl = document.getElementById("categoryIsNegative");
@@ -36,22 +56,6 @@ document.addEventListener("DOMContentLoaded", function() {
         } else {
             imagePreview.src = "";
         }
-    }
-
-    function addFromThingInput(e) {
-        const clone = fromThingInput.cloneNode(false);
-        clone.value = ""
-        clone.id = null
-        fromThingInput.parentElement.appendChild(clone);
-    }
-
-    function removeEmptyFromThingNames(formData) {
-        let fromThingNames = formData.getAll("fromThingNames");
-        fromThingNames = fromThingNames.filter(name => String(name) !== "");
-        formData.delete("fromThingNames");
-        fromThingNames.forEach(name => {
-            formData.append("fromThingNames", name);
-        });
     }
 
     async function submit(e) {

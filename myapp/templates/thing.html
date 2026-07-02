@@ -23,6 +23,7 @@
                         <tr>
                             <th>Rank</th>
                             <th>Category</th>
+                            <th>Thing</th>
                             <th>Votes</th>
                             <th></th>
                         </tr>
@@ -32,12 +33,15 @@
                             <tr data-category-name="{{ score.category_name }}">
                                 <td>{{ score.rank_text }}</td>
                                 <td><a href="{{ url_for('show_category', name=score.category_name) }}">{{ score.category_name }}</a></td>
+                                <td>
+                                    <a href="{{ url_for('show_thing', name=score.source_thing) }}">{{ score.source_thing }}</a>
+                                </td>
                                 <td class="vote-count">{{ score.num_votes }}</td>
                                 <td>
-                                    <button class="upvote_button" data-category="{{ score.category_name }}" data-thing="{{ thing.name }}">
+                                    <button class="upvote_button" data-category="{{ score.category_name }}" data-thing="{{ score.source_thing }}">
                                         <img
                                             src='{{ url_for("static", filename="assets/images/"
-                                                + ("up_arrow_green.png" if score.category_name in current_user_votes and current_user_votes[score.category_name] == thing.name else "up_arrow_white.png")
+                                                + ("up_arrow_green.png" if score.category_name in current_user_votes and current_user_votes[score.category_name] == score.source_thing else "up_arrow_white.png")
                                                 ) }}'
                                             width="10" height="10" class="upvote_img">
                                     </button>

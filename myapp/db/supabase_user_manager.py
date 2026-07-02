@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any, List, Optional
 
 import httpx
 from supabase import AuthError
@@ -92,5 +92,16 @@ class SupabaseUserManager:
             if response is None:
                 return None
             return Profile.from_json(response.data[0])
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get_profiles(self) -> List[Profile]:
+        """Return all things stored in Supabase."""
+        try:
+            response = self.supabase.table("profiles").select("*").execute()
+            items = []
+            for item in response.data:
+                items.append(Profile.from_json(item))
+            return items
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
