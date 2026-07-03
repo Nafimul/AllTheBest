@@ -23,7 +23,6 @@ class SupabaseVoteManager:
             raise ConnectionError(str(e)) from e
 
     def get_by_user_id(self, user_id) -> List[Vote]:
-        """Return all votes stored in Supabase."""
         try:
             response = (
                 self.supabase.table("votes")
