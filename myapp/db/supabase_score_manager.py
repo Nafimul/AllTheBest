@@ -21,6 +21,37 @@ class SupabaseScoreManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def get_by_thing(self, thing_name) -> List[Score]:
+        """Return score with given thing_name."""
+        try:
+            response = (
+                self.supabase.table("scores")
+                .select("*")
+                .filter("thing_name", "eq", thing_name)
+                .execute()
+            )
+            items = []
+            for item in response.data:
+                items.append(Score.from_json(item))
+            return items
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get_by_things(self, thing_names: List[str]) -> List[Score]:
+        try:
+            response = (
+                self.supabase.table("scores")
+                .select("*")
+                .in_("thing_name", thing_names)
+                .execute()
+            )
+            items = []
+            for item in response.data:
+                items.append(Score.from_json(item))
+            return items
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def get_categories_with_scores(self, scores_per_category) -> List[Category]:
         """Return all categories stored in Supabase
         with their corresponding things sorted from highest to lowest score."""
