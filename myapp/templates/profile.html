@@ -6,56 +6,46 @@
 {% block content %}
 <h1>{{ user.name }}'s Profile</h1>
 
-{% if profile_votes %}
-  <ul class="profile-votes">
-    {% for entry in profile_votes %}
-      <li class="profile-vote-card{% if entry.vote.is_favorite %} favorite{% endif %}">
-        <a href="{{ url_for('show_vote', category_name=entry.vote.category_name, thing_name=entry.vote.thing_name, user_id=entry.vote.user_id) }}">
-          {% if entry.thing and entry.thing.img_path %}
-            <img class="profile-vote-image{% if entry.is_spoiler %} spoiler-image{% endif %}" src="{{ entry.thing.img_path }}" alt="{{ entry.vote.thing_name }}">
-          {% else %}
-            <div class="profile-vote-image placeholder{% if entry.is_spoiler %} spoiler-image{% endif %}">No image</div>
-          {% endif %}
-        </a>
+{% if profile_things %}
+  <ul class="profile-things">
+    {% for entry in profile_things %}
+      {% set thing = entry.thing %}
+      <li class="profile-thing-card">
+        {% if thing.img_path %}
+          <img class="profile-thing-image" src="{{ thing.img_path }}" alt="{{ thing.name }}">
+        {% else %}
+          <div class="profile-thing-image placeholder">No image</div>
+        {% endif %}
+
         <div>
-          <p>
-            {% if entry.is_spoiler %}
-              <button
-                type="button"
-                class="spoiler-toggle"
-                data-spoiler-for="{{ entry.spoiler_for }}"
-                data-thing-name="{{ entry.vote.thing_name }}"
-                data-link-target="{{ url_for('show_thing', name=entry.vote.thing_name) }}"
-              >
-                CLICK TO SEE SPOILER FOR {{ entry.spoiler_for }}
-              </button>
-            {% else %}
-              <a href="{{ url_for('show_thing', name=entry.vote.thing_name) }}">
-                {{ entry.vote.thing_name }}
-              </a>
-            {% endif %}
-          </p>
-          <a href="{{ url_for('show_category', name=entry.vote.category_name) }}">
-            {{ entry.vote.category_name }}
-          </a>
-          <button
-            class="upvote_button"
-            data-category="{{ entry.vote.category_name }}"
-            data-thing="{{ entry.vote.thing_name }}"
-            type="button"
-          >
-            <img
-              src='{{ url_for("static", filename="assets/images/"
-                  + ("up_arrow_green.png" if entry.vote.category_name in current_user_votes and current_user_votes[entry.vote.category_name] == entry.vote.thing_name else "up_arrow_white.png")
-                  ) }}'
-              width="10"
-              height="10"
-              class="upvote_img"
-            >
-          </button>
-          {% if entry.vote.is_favorite %}
-            <p>Favorite vote</p>
-          {% endif %}
+          <a href="{{ url_for('show_thing', name=thing.name) }}">{{ thing.name }}</a>
+          <ul class="profile-thing-categories">
+            {% for c in entry.categories %}
+              <li>
+                {% if c.is_spoiler %}
+                  <button
+                    type="button"
+                    class="spoiler-toggle"
+                    data-spoiler-for="{{ c.spoiler_for }}"
+                    data-thing-name="{{ c.source_thing }}"
+                    data-link-target="{{ url_for('show_thing', name=c.source_thing) }}"
+                  >
+                    CLICK TO SEE SPOILER FOR {{ c.spoiler_for }}
+                  </button>
+                {% else %}
+                  <a href="{{ url_for('show_thing', name=c.source_thing) }}">{{ c.source_thing }}</a>
+                {% endif %}
+                &nbsp;in&nbsp;
+                <a href="{{ url_for('show_category', name=c.category_name) }}">{{ c.category_name }}</a>
+
+                <button class="upvote_button" data-category="{{ c.category_name }}" data-thing="{{ c.source_thing }}">
+                  <img
+                    src='{{ url_for("static", filename="assets/images/" + ("up_arrow_green.png" if c.category_name in current_user_votes and current_user_votes[c.category_name] == c.source_thing else "up_arrow_white.png")) }}'
+                    width="10" height="10" class="upvote_img">
+                </button>
+              </li>
+            {% endfor %}
+          </ul>
         </div>
       </li>
     {% endfor %}
