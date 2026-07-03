@@ -13,16 +13,18 @@
       <ul class="profile-thing-categories">
         {% for row in rows %}
           {% set source_thing = row.source_thing if row.source_thing is defined else row.thing_name %}
+          {% set spoiler_for = row.spoiler_for if row.spoiler_for is defined else None %}
+          {% set is_spoiler = row.is_spoiler if row.is_spoiler is defined else bool(spoiler_for) %}
           <li>
-            {% if row.is_spoiler %}
+            {% if is_spoiler %}
               <button
                 type="button"
                 class="spoiler-toggle"
-                data-spoiler-for="{{ row.spoiler_for }}"
+                data-spoiler-for="{{ spoiler_for }}"
                 data-thing-name="{{ source_thing }}"
                 data-link-target="{{ url_for('show_thing', name=source_thing) }}"
               >
-                CLICK TO SEE SPOILER FOR {{ row.spoiler_for }}
+                CLICK TO SEE SPOILER FOR {{ spoiler_for }}
               </button>
             {% else %}
               <a href="{{ url_for('show_thing', name=source_thing) }}">{{ source_thing }}</a>

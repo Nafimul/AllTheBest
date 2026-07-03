@@ -63,6 +63,28 @@ def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[tuple[str, str], st
     return spoiler_for_by_thing
 
 
+def build_score_row(
+    score: Score,
+    category_scores: list[Score],
+    spoiler_for_by_thing: Optional[dict[tuple[str, str], str]] = None,
+) -> dict[str, Any]:
+    """Build a score row with rank and spoiler metadata for a single score."""
+    rank = _resolve_category_rank(
+        score, sorted(category_scores, key=lambda item: item.num_votes, reverse=True)
+    )
+    spoiler_lookup = spoiler_for_by_thing or {}
+    spoiler_for = spoiler_lookup.get((score.thing_name, score.category_name))
+    return {
+        "category_name": score.category_name,
+        "num_votes": score.num_votes,
+        "rank_text": f"{rank}{_rank_suffix(rank)}",
+        "is_first": rank == 1,
+        "source_thing": score.thing_name,
+        "is_spoiler": bool(spoiler_for),
+        "spoiler_for": spoiler_for,
+    }
+
+
 # Build a list of score rows for a thing, sorted with first-place categories first.
 # name: thing name to filter on, scores: all category scores.
 def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
@@ -72,19 +94,11 @@ def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
 
     thing_scores: list[dict[str, Any]] = []
     for score in filter(lambda s: s.thing_name == name, scores):
-        category_scores = sorted(
-            categories_by_name[score.category_name],
-            key=lambda item: item.num_votes,
-            reverse=True,
-        )
-        rank = _resolve_category_rank(score, category_scores)
         thing_scores.append(
-            {
-                "category_name": score.category_name,
-                "num_votes": score.num_votes,
-                "rank_text": f"{rank}{_rank_suffix(rank)}",
-                "is_first": rank == 1,
-            }
+            build_score_row(
+                score,
+                categories_by_name[score.category_name],
+            )
         )
 
     return sorted(
@@ -215,6 +229,8 @@ def create_app(env: str = "development") -> Flask:
         for score in scores:
             categories_by_name.setdefault(score.category_name, []).append(score)
 
+        spoiler_for_by_thing = _build_spoiler_for_by_thing(scores)
+
         things_with_scores: list[dict[str, Any]] = []
         # For each thing, include scores for it and its descendants, sorted same as show_thing
         for thing in things:
@@ -242,22 +258,13 @@ def create_app(env: str = "development") -> Flask:
                 or s.thing_name in descendant_names,
                 scores,
             ):
-                category_scores = sorted(
+                row = build_score_row(
+                    score,
                     categories_by_name[score.category_name],
-                    key=lambda item: item.num_votes,
-                    reverse=True,
+                    spoiler_for_by_thing=spoiler_for_by_thing,
                 )
-                rank = _resolve_category_rank(score, category_scores)
-                thing_scores.append(
-                    {
-                        "category_name": score.category_name,
-                        "num_votes": score.num_votes,
-                        "rank_text": f"{rank}{_rank_suffix(rank)}",
-                        "is_first": rank == 1,
-                        "source_thing": score.thing_name,
-                        "is_direct": score.thing_name == thing.name,
-                    }
-                )
+                row["is_direct"] = score.thing_name == thing.name
+                thing_scores.append(row)
 
             thing_scores = sorted(
                 thing_scores,
