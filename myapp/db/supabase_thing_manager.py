@@ -157,6 +157,17 @@ class SupabaseThingManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def get_thing_and_descendant_names(self, thing_name) -> List[str]:
+        try:
+            response = self.supabase.rpc(
+                "get_thing_descendants_names",
+                {"start_thing_name": thing_name},
+            ).execute()
+            names = [row["thing_name"] for row in (response.data or [])]
+            return names
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def get_children(self, parent_name: str) -> list[str]:
         """Return the list of thing names that declare they are from `parent_name`.
 
