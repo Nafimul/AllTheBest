@@ -337,56 +337,10 @@ def create_app(env: str = "development") -> Flask:
                 current_user_votes={},
             )
 
-        scores = score_manager.get_all()
-        # Find all descendant "from" things (multiple layers) while avoiding cycles.
-        descendant_names: set[str] = set()
-        visited: set[str] = set()
-        stack: list[str] = [name]
-        visited.add(name)
-        while stack:
-            current = stack.pop()
-            try:
-                children = thing_manager.get_children(current)
-            except ConnectionError:
-                children = []
-            for child in children:
-                if child in visited:
-                    continue
-                visited.add(child)
-                descendant_names.add(child)
-                stack.append(child)
+        thing_and_descendant_names = thing_manager.get_thing_and_descendant_names(name)
+        scores = score_manager.get_by_things(thing_and_descendant_names)
 
-        # Build a combined list of scores for the current thing and any descendant things.
-        categories_by_name: dict[str, list[Score]] = {}
-        for score in scores:
-            categories_by_name.setdefault(score.category_name, []).append(score)
-
-        thing_scores: list[dict[str, Any]] = []
-        for score in filter(
-            lambda s: s.thing_name == name or s.thing_name in descendant_names, scores
-        ):
-            category_scores = sorted(
-                categories_by_name[score.category_name],
-                key=lambda item: item.num_votes,
-                reverse=True,
-            )
-            rank = _resolve_category_rank(score, category_scores)
-            thing_scores.append(
-                {
-                    "category_name": score.category_name,
-                    "num_votes": score.num_votes,
-                    "rank_text": f"{rank}{_rank_suffix(rank)}",
-                    "is_first": rank == 1,
-                    # Name of the thing that actually received these votes (may differ from page thing)
-                    "source_thing": score.thing_name,
-                    "is_direct": score.thing_name == name,
-                }
-            )
-
-        thing_scores = sorted(
-            thing_scores,
-            key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"]),
-        )
+        scores = sorted(scores, key=lambda score: (-score.num_votes))
 
         current_user_votes = {}
         if current_user.is_authenticated:
@@ -396,7 +350,7 @@ def create_app(env: str = "development") -> Flask:
         return render_template(
             "thing.html",
             thing=thing,
-            thing_scores=thing_scores,
+            thing_scores=scores,
             current_user_votes=current_user_votes,
         )
 
