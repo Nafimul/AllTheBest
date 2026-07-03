@@ -1,0 +1,43 @@
+{% macro render_thing_card(entry, current_user_votes, card_class='profile-thing-card') %}
+  {% set thing = entry.thing %}
+  {% set rows = entry.categories if entry.categories is defined else entry.thing_scores %}
+  <li class="{{ card_class }}">
+    {% if thing.img_path %}
+      <img class="profile-thing-image" src="{{ thing.img_path }}" alt="{{ thing.name }}">
+    {% else %}
+      <div class="profile-thing-image placeholder">No image</div>
+    {% endif %}
+
+    <div>
+      <a href="{{ url_for('show_thing', name=thing.name) }}">{{ thing.name }}</a>
+      <ul class="profile-thing-categories">
+        {% for row in rows %}
+          {% set source_thing = row.source_thing if row.source_thing is defined else row.thing_name %}
+          <li>
+            {% if row.is_spoiler %}
+              <button
+                type="button"
+                class="spoiler-toggle"
+                data-spoiler-for="{{ row.spoiler_for }}"
+                data-thing-name="{{ source_thing }}"
+                data-link-target="{{ url_for('show_thing', name=source_thing) }}"
+              >
+                CLICK TO SEE SPOILER FOR {{ row.spoiler_for }}
+              </button>
+            {% else %}
+              <a href="{{ url_for('show_thing', name=source_thing) }}">{{ source_thing }}</a>
+            {% endif %}
+            &nbsp;in&nbsp;
+            <a href="{{ url_for('show_category', name=row.category_name) }}">{{ row.category_name }}</a>
+
+            <button class="upvote_button" data-category="{{ row.category_name }}" data-thing="{{ source_thing }}">
+              <img
+                src='{{ url_for("static", filename="assets/images/" + ("up_arrow_green.png" if row.category_name in current_user_votes and current_user_votes[row.category_name] == source_thing else "up_arrow_white.png")) }}'
+                width="10" height="10" class="upvote_img">
+            </button>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  </li>
+{% endmacro %}
