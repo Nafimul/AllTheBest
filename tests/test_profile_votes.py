@@ -34,7 +34,7 @@ class ProfileVoteEntriesTests(unittest.TestCase):
         votes = [
             Vote(user_id="user-1", thing_name="Coffee", category_name="Drinks"),
         ]
-        spoiler_for_by_thing = {"Coffee": "The Matrix"}
+        spoiler_for_by_thing = {("Coffee", "Drinks"): "The Matrix"}
 
         entries = build_profile_vote_entries(
             votes,
@@ -44,6 +44,24 @@ class ProfileVoteEntriesTests(unittest.TestCase):
 
         self.assertEqual(entries[0]["spoiler_for"], "The Matrix")
         self.assertTrue(entries[0]["is_spoiler"])
+
+    def test_spoiler_metadata_is_scoped_to_the_matching_category(self) -> None:
+        votes = [
+            Vote(user_id="user-1", thing_name="Coffee", category_name="Drinks"),
+            Vote(user_id="user-1", thing_name="Coffee", category_name="Food"),
+        ]
+        spoiler_for_by_thing = {("Coffee", "Food"): "The Matrix"}
+
+        entries = build_profile_vote_entries(
+            votes,
+            DummyThingManager(),
+            spoiler_for_by_thing=spoiler_for_by_thing,
+        )
+
+        self.assertIsNone(entries[0]["spoiler_for"])
+        self.assertFalse(entries[0]["is_spoiler"])
+        self.assertEqual(entries[1]["spoiler_for"], "The Matrix")
+        self.assertTrue(entries[1]["is_spoiler"])
 
     def test_current_user_votes_are_collected_by_category(self) -> None:
         votes = [

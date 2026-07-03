@@ -52,12 +52,14 @@ def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
     )
 
 
-def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[str, str]:
-    """Return a mapping of thing names to spoiler labels for marked scores."""
-    spoiler_for_by_thing: dict[str, str] = {}
+def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[tuple[str, str], str]:
+    """Return a mapping of (thing name, category name) pairs to spoiler labels."""
+    spoiler_for_by_thing: dict[tuple[str, str], str] = {}
     for score in scores:
         if score.spoiler_for:
-            spoiler_for_by_thing[score.thing_name] = score.spoiler_for
+            spoiler_for_by_thing[(score.thing_name, score.category_name)] = (
+                score.spoiler_for
+            )
     return spoiler_for_by_thing
 
 
@@ -98,7 +100,7 @@ def build_current_user_votes(votes: list[Vote]) -> dict[str, str]:
 def build_profile_vote_entries(
     votes: list[Vote],
     thing_manager: Any,
-    spoiler_for_by_thing: Optional[dict[str, str]] = None,
+    spoiler_for_by_thing: Optional[dict[tuple[str, str], str]] = None,
 ) -> list[dict[str, Any]]:
     """Return vote entries sorted with favorite votes first and enriched with thing data."""
     sorted_votes = sorted(votes, key=lambda vote: vote.is_favorite, reverse=True)
@@ -108,7 +110,7 @@ def build_profile_vote_entries(
         thing = None
         if thing_manager is not None:
             thing = thing_manager.get_thing(vote.thing_name)
-        spoiler_for = spoiler_lookup.get(vote.thing_name)
+        spoiler_for = spoiler_lookup.get((vote.thing_name, vote.category_name))
         entries.append(
             {
                 "vote": vote,
@@ -538,12 +540,13 @@ def create_app(env: str = "development") -> Flask:
             # For each matching vote, collect category and source thing
             category_entries: list[dict[str, Any]] = []
             for v in matching_votes:
+                spoiler_for = spoiler_for_by_thing.get((v.thing_name, v.category_name))
                 category_entries.append(
                     {
                         "category_name": v.category_name,
                         "source_thing": v.thing_name,
-                        "is_spoiler": bool(spoiler_for_by_thing.get(v.thing_name)),
-                        "spoiler_for": spoiler_for_by_thing.get(v.thing_name),
+                        "is_spoiler": bool(spoiler_for),
+                        "spoiler_for": spoiler_for,
                     }
                 )
 
@@ -592,7 +595,7 @@ def create_app(env: str = "development") -> Flask:
         spoiler_for_by_thing = _build_spoiler_for_by_thing(
             category_manager.get_scores()
         )
-        spoiler_for = spoiler_for_by_thing.get(thing_name)
+        spoiler_for = spoiler_for_by_thing.get((thing_name, category_name))
         is_spoiler = bool(spoiler_for)
 
         return render_template(
@@ -606,4 +609,3 @@ def create_app(env: str = "development") -> Flask:
         )
 
     return app
-
