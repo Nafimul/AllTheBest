@@ -9,6 +9,7 @@ import httpx
 from supabase import create_client
 
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
+from myapp.db.supabase_score_manager import SupabaseScoreManager
 from myapp.db.supabase_user_manager import SupabaseUserManager
 from myapp.db.supabase_thing_manager import SupabaseThingManager
 from myapp.db.supabase_vote_manager import SupabaseVoteManager
@@ -156,6 +157,7 @@ def create_app(env: str = "development") -> Flask:
     thing_manager = SupabaseThingManager(supabase_client)
     category_manager = SupabaseCategoryManager(supabase_client)
     vote_manager = SupabaseVoteManager(supabase_client)
+    score_manager = SupabaseScoreManager(supabase_client)
 
     @app.errorhandler(ConnectionError)
     def handle_connection_error(e: ConnectionError):
@@ -190,7 +192,7 @@ def create_app(env: str = "development") -> Flask:
     def list_categories() -> str:
         """Render the categories page with the current category list."""
         THINGS_TO_SHOW_PER_CATEGORY = 3
-        categories_with_scores = category_manager.get_categories_with_scores(
+        categories_with_scores = score_manager.get_categories_with_scores(
             scores_per_category=THINGS_TO_SHOW_PER_CATEGORY
         )
         current_user_votes = []
@@ -222,7 +224,7 @@ def create_app(env: str = "development") -> Flask:
     def list_things() -> str:
         """Render a page with all things."""
         things = thing_manager.get_things()
-        scores = category_manager.get_scores()
+        scores = score_manager.get_all()
 
         # Precompute categories_by_name for ranking
         categories_by_name: dict[str, list[Score]] = {}
@@ -294,7 +296,7 @@ def create_app(env: str = "development") -> Flask:
         if category is None:
             return render_template("category.html", category=None, scores=[])
 
-        scores = category_manager.get_scores()
+        scores = score_manager.get_all()
         # filter and sort scores for this category by votes desc
         scores_for_cat = list(filter(lambda s: s.category_name == name, scores))
         scores_for_cat.sort(key=lambda s: s.num_votes, reverse=True)
@@ -335,7 +337,7 @@ def create_app(env: str = "development") -> Flask:
                 current_user_votes={},
             )
 
-        scores = category_manager.get_scores()
+        scores = score_manager.get_all()
         # Find all descendant "from" things (multiple layers) while avoiding cycles.
         descendant_names: set[str] = set()
         visited: set[str] = set()
@@ -508,9 +510,7 @@ def create_app(env: str = "development") -> Flask:
             current_user_votes = build_current_user_votes(current_user_vote_objects)
 
         # Build spoiler mapping used to determine when to hide links
-        spoiler_for_by_thing = _build_spoiler_for_by_thing(
-            category_manager.get_scores()
-        )
+        spoiler_for_by_thing = _build_spoiler_for_by_thing(score_manager.get_all())
 
         # Build profile view entries grouped by thing page. For each thing in the system,
         # include it if this user has voted for that thing or any descendant; collect
@@ -599,9 +599,7 @@ def create_app(env: str = "development") -> Flask:
             pass
 
         # Check if this is a spoiler vote
-        spoiler_for_by_thing = _build_spoiler_for_by_thing(
-            category_manager.get_scores()
-        )
+        spoiler_for_by_thing = _build_spoiler_for_by_thing(score_manager.get_all())
         spoiler_for = spoiler_for_by_thing.get((thing_name, category_name))
         is_spoiler = bool(spoiler_for)
 
