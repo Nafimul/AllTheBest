@@ -1,15 +1,37 @@
 {% extends 'base.html' %}
 {% block title %}Things{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
 {% block content %}
     <h2>All Things</h2>
-    {% if things %}
+    {% if things_with_scores %}
         <ul class="things-list">
-            {% for thing in things %}
-                <li>
+            {% for entry in things_with_scores %}
+                {% set thing = entry.thing %}
+                <li class="thing-list-card">
                     <a href="{{ url_for('show_thing', name=thing.name) }}">{{ thing.name }}</a>
-                    {% if thing.from_thing_name %}
-                        <span class="thing-from">from {{ thing.from_thing_name }}</span>
+                    {% if thing.img_path %}
+                        <img src="{{ thing.img_path }}" alt="{{ thing.name }}" class="thing-image" />
                     {% endif %}
+
+                    <div class="thing-categories">
+                        {% if entry.thing_scores %}
+                            <ol>
+                                {% for score in entry.thing_scores %}
+                                    <li>
+                                        <a href="{{ url_for('show_category', name=score.category_name) }}">{{ score.category_name }}</a>
+                                        <a href="{{ url_for('show_thing', name=score.source_thing) }}">{{ score.source_thing }}</a>
+                                        <button class="upvote_button" data-category="{{ score.category_name }}" data-thing="{{ score.source_thing }}">
+                                            <img
+                                                src='{{ url_for("static", filename="assets/images/" + ("up_arrow_green.png" if score.category_name in current_user_votes and current_user_votes[score.category_name] == score.source_thing else "up_arrow_white.png")) }}'
+                                                width="10" height="10" class="upvote_img">
+                                        </button>
+                                    </li>
+                                {% endfor %}
+                            </ol>
+                        {% endif %}
+                    </div>
                 </li>
             {% endfor %}
         </ul>
