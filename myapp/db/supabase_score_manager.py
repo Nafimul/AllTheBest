@@ -95,7 +95,6 @@ class SupabaseScoreManager:
                 sorted(things_with_votes.items(), key=lambda e: len(e[1]), reverse=True)
             )
 
-            print(things_with_votes)
             return things_with_votes
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e

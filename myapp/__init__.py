@@ -232,66 +232,10 @@ def create_app(env: str = "development") -> Flask:
     def list_things() -> str:
         """Render a page with all things."""
         things = thing_manager.get_things()
-        scores = score_manager.get_all()
-
-        # Precompute categories_by_name for ranking
-        categories_by_name: dict[str, list[Score]] = {}
-        for score in scores:
-            categories_by_name.setdefault(score.category_name, []).append(score)
-
-        spoiler_for_by_thing = _build_spoiler_for_by_thing(scores)
-
-        things_with_scores: list[dict[str, Any]] = []
-        # For each thing, include scores for it and its descendants, sorted same as show_thing
-        for thing in things:
-            # gather descendants
-            descendant_names: set[str] = set()
-            visited: set[str] = set()
-            stack: list[str] = [thing.name]
-            visited.add(thing.name)
-            while stack:
-                current = stack.pop()
-                try:
-                    children = thing_manager.get_children(current)
-                except ConnectionError:
-                    children = []
-                for child in children:
-                    if child in visited:
-                        continue
-                    visited.add(child)
-                    descendant_names.add(child)
-                    stack.append(child)
-
-            thing_scores: list[dict[str, Any]] = []
-            for score in filter(
-                lambda s: s.thing_name == thing.name
-                or s.thing_name in descendant_names,
-                scores,
-            ):
-                row = build_score_row(
-                    score,
-                    categories_by_name[score.category_name],
-                    spoiler_for_by_thing=spoiler_for_by_thing,
-                )
-                row["is_direct"] = score.thing_name == thing.name
-                thing_scores.append(row)
-
-            thing_scores = sorted(
-                thing_scores,
-                key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"]),
-            )
-
-            # only show top 3 categories per thing on the listing
-            things_with_scores.append(
-                {"thing": thing, "thing_scores": thing_scores[:3]}
-            )
-
-        current_user_votes = get_current_user_votes()
 
         return render_template(
             "things.html",
-            things_with_scores=things_with_scores,
-            current_user_votes=current_user_votes,
+            things=things,
         )
 
     @app.route("/categories/<string:name>", methods=["GET"])

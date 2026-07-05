@@ -6,10 +6,14 @@
 {% endblock %}
 {% block content %}
     <h2>All Things</h2>
-    {% if things_with_scores %}
+    {% if things %}
         <ul class="things-list">
-            {% for entry in things_with_scores %}
-                {{ render_thing_card(entry, current_user_votes, card_class='thing-list-card') }}
+            {% for thing in things %}
+            <a href="{{ url_for('show_thing', name=thing_name) }}">
+                <li>
+                    {{ thing.name }}
+                </li>
+            </a>
             {% endfor %}
         </ul>
     {% else %}
