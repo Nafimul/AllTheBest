@@ -125,7 +125,7 @@ def create_app(env: str = "development") -> Flask:
         THINGS_TO_SHOW_PER_CATEGORY = 3
         categories_with_scores = score_manager.get_categories_with_scores(
             num_scores_per_category=THINGS_TO_SHOW_PER_CATEGORY,
-            category_manager=category_manager
+            category_manager=category_manager,
         )
         current_user_votes = get_current_user_votes()
         return render_template(
@@ -185,11 +185,16 @@ def create_app(env: str = "development") -> Flask:
 
         current_user_votes = get_current_user_votes()
 
+        first_thing_img_path = None
+        if len(rows) > 0:
+            first_thing_img_path = thing_manager.get_thing(rows[0]["thing_name"]).img_path
+
         return render_template(
             "category.html",
             category=category,
             scores=rows,
             current_user_votes=current_user_votes,
+            first_thing_img_path=first_thing_img_path,
         )
 
     @app.route("/things/<string:name>", methods=["GET"])

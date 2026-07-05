@@ -189,3 +189,22 @@ class SupabaseThingManager:
             return [item.get("thing_name") for item in response.data]
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
+
+    def search_things_by_name(
+        self, search_text: str, max_things: int = 3, min_sensitivity: float = 0.1
+    ):
+        try:
+            response = self.supabase.rpc(
+                "search_things",
+                {
+                    "search_text": search_text,
+                    "max_things": max_things,
+                    "min_sensitivity": min_sensitivity,
+                },
+            ).execute()
+            things = []
+            for item in response.data:
+                things.append(Thing.from_json(item))
+            return things
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
