@@ -175,6 +175,33 @@ def create_app(env: str = "development") -> Flask:
         )
         return [{"name": thing.name, "type": "thing"} for thing in things], 200
 
+    @app.route("/api/thing/<string:name>")
+    def get_thing_details(name: str) -> tuple[dict, int]:
+        """Return existing thing data for autofill."""
+        thing = thing_manager.get_thing(name)
+        if thing is None:
+            return {}, 404
+
+        return {
+            "name": thing.name,
+            "img_path": thing.img_path,
+            "from_thing_names": thing_manager.get_from_thing_names(name),
+        }, 200
+
+    @app.route("/api/category/<string:name>")
+    def get_category_details(name: str) -> tuple[dict, int]:
+        """Return existing category data for autofill."""
+        category = category_manager.get(name)
+        if category is None:
+            return {}, 404
+
+        return {
+            "name": category.name,
+            "desc": category.desc,
+            "is_spoiler": category.is_spoiler,
+            "is_negative": category.is_negative,
+        }, 200
+
     @app.route("/users")
     def list_users() -> str:
         """Render the categories page with the current users list."""
