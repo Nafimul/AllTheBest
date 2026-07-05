@@ -1,136 +1,170 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const searchBox = document.getElementById('global-search-input');
-    const searchTypeInputs = document.querySelectorAll('input[name="search-type"]');
-    const suggestionsBox = document.getElementById('global-search-suggestions');
-    const searchForm = document.getElementById('global-search-form');
+    const forms = document.querySelectorAll('.search-bar');
 
-    if (!searchBox || !suggestionsBox || !searchForm) {
-        return;
-    }
+    forms.forEach((form) => {
+        const searchInput = form.querySelector('input[type="text"]');
+        const suggestionsBox = form.querySelector('.search-suggestions');
+        const searchTypeInputs = form.querySelectorAll('input[name="search-type"]');
 
-    let activeIndex = -1;
-    let currentSuggestions = [];
+        if (!searchInput || !suggestionsBox) return;
 
-    const setSuggestions = (items) => {
-        currentSuggestions = items;
-        activeIndex = -1;
-        if (!items.length) {
+        let activeIndex = -1;
+        let currentSuggestions = [];
+
+        const getSearchType = () => {
+            // 1. try radio buttons inside this form
+            const selectedRadio = form.querySelector('input[name="search-type"]:checked');
+            if (selectedRadio) return selectedRadio.value;
+
+            // 2. fallback to input class
+            if (searchInput.classList.contains('category')) return 'category';
+            if (searchInput.classList.contains('thing')) return 'thing';
+
+            // 3. default
+            return 'thing';
+        };
+
+        const setSuggestions = (items) => {
+            currentSuggestions = items;
+            activeIndex = -1;
+
+            if (!items.length) {
+                suggestionsBox.innerHTML = '';
+                suggestionsBox.style.display = 'none';
+                return;
+            }
+
+            suggestionsBox.innerHTML = items
+                .map(
+                    (item, index) => `
+                        <button type="button"
+                            class="search-suggestion"
+                            data-index="${index}"
+                            data-name="${item.name}">
+                            ${item.name}
+                        </button>
+                    `
+                )
+                .join('');
+
+            suggestionsBox.style.display = 'block';
+        };
+
+        const hideSuggestions = () => {
             suggestionsBox.innerHTML = '';
             suggestionsBox.style.display = 'none';
-            return;
-        }
+            currentSuggestions = [];
+            activeIndex = -1;
+        };
 
-        suggestionsBox.innerHTML = items
-            .map(
-                (item, index) => `
-                    <button type="button" class="search-suggestion" data-index="${index}" data-name="${item.name}">
-                        ${item.name}
-                    </button>
-                `,
-            )
-            .join('');
-        suggestionsBox.style.display = 'block';
-    };
+        const highlightSuggestion = (index) => {
+            const buttons = suggestionsBox.querySelectorAll('.search-suggestion');
+            buttons.forEach((btn, i) => {
+                btn.classList.toggle('active', i === index);
+            });
+        };
 
-    const hideSuggestions = () => {
-        suggestionsBox.innerHTML = '';
-        suggestionsBox.style.display = 'none';
-        currentSuggestions = [];
-        activeIndex = -1;
-    };
+        const lookupSuggestions = async (query) => {
+            const type = getSearchType();
 
-    const lookupSuggestions = async (query) => {
-        const type = document.querySelector('input[name="search-type"]:checked')?.value || 'thing';
-        if (!query.trim()) {
-            hideSuggestions();
-            return;
-        }
-
-        const response = await fetch(`/api/search?type=${type}&q=${encodeURIComponent(query)}`);
-        if (!response.ok) {
-            return;
-        }
-
-        const suggestions = await response.json();
-        setSuggestions(suggestions);
-    };
-
-    searchBox.addEventListener('input', () => {
-        const query = searchBox.value.trim();
-        if (query.length < 1) {
-            hideSuggestions();
-            return;
-        }
-        lookupSuggestions(query);
-    });
-
-    searchTypeInputs.forEach((input) => {
-        input.addEventListener('change', () => {
-            if (searchBox.value.trim()) {
-                lookupSuggestions(searchBox.value.trim());
-            }
-        });
-    });
-
-    searchBox.addEventListener('keydown', (event) => {
-        if (!currentSuggestions.length) {
-            return;
-        }
-
-        if (event.key === 'ArrowDown') {
-            event.preventDefault();
-            activeIndex = (activeIndex + 1) % currentSuggestions.length;
-            highlightSuggestion(activeIndex);
-        } else if (event.key === 'ArrowUp') {
-            event.preventDefault();
-            activeIndex = (activeIndex - 1 + currentSuggestions.length) % currentSuggestions.length;
-            highlightSuggestion(activeIndex);
-        } else if (event.key === 'Enter' && activeIndex >= 0) {
-            event.preventDefault();
-            const selected = currentSuggestions[activeIndex];
-            if (selected) {
-                searchBox.value = selected.name;
+            if (!query.trim()) {
                 hideSuggestions();
-                searchForm.submit();
+                return;
             }
-        } else if (event.key === 'Escape') {
-            hideSuggestions();
-        }
-    });
 
-    const highlightSuggestion = (index) => {
-        const buttons = suggestionsBox.querySelectorAll('.search-suggestion');
-        buttons.forEach((button, buttonIndex) => {
-            button.classList.toggle('active', buttonIndex === index);
+            const response = await fetch(
+                `/api/search?type=${type}&q=${encodeURIComponent(query)}`
+            );
+
+            if (!response.ok) return;
+
+            const suggestions = await response.json();
+            setSuggestions(suggestions);
+        };
+
+        // INPUT
+        searchInput.addEventListener('input', () => {
+            const query = searchInput.value.trim();
+
+            if (query.length < 1) {
+                hideSuggestions();
+                return;
+            }
+
+            lookupSuggestions(query);
         });
-    };
 
-    searchForm.addEventListener('submit', (event) => {
-        const selectedType = document.querySelector('input[name="search-type"]:checked')?.value || 'thing';
-        const query = searchBox.value.trim();
-        if (!query) {
-            return;
-        }
+        // RADIO CHANGE (only if exists)
+        searchTypeInputs.forEach((input) => {
+            input.addEventListener('change', () => {
+                const query = searchInput.value.trim();
+                if (query) lookupSuggestions(query);
+            });
+        });
 
-        searchForm.action = selectedType === 'category' ? '/categories' : '/things';
-    });
+        // KEYBOARD NAV
+        searchInput.addEventListener('keydown', (event) => {
+            if (!currentSuggestions.length) return;
 
-    suggestionsBox.addEventListener('click', (event) => {
-        const button = event.target.closest('.search-suggestion');
-        if (!button) {
-            return;
-        }
+            if (event.key === 'ArrowDown') {
+                event.preventDefault();
+                activeIndex = (activeIndex + 1) % currentSuggestions.length;
+                highlightSuggestion(activeIndex);
+            }
 
-        searchBox.value = button.dataset.name || '';
-        hideSuggestions();
-        const selectedType = document.querySelector('input[name="search-type"]:checked')?.value || 'thing';
-        searchForm.action = selectedType === 'category' ? '/categories' : '/things';
-        searchForm.submit();
-    });
+            if (event.key === 'ArrowUp') {
+                event.preventDefault();
+                activeIndex =
+                    (activeIndex - 1 + currentSuggestions.length) %
+                    currentSuggestions.length;
+                highlightSuggestion(activeIndex);
+            }
 
-    document.addEventListener('click', (event) => {
-        if (!searchForm.contains(event.target)) {
+            if (event.key === 'Enter' && activeIndex >= 0) {
+                event.preventDefault();
+                const selected = currentSuggestions[activeIndex];
+                if (selected) {
+                    searchInput.value = selected.name;
+                    hideSuggestions();
+                    form.submit();
+                }
+            }
+
+            if (event.key === 'Escape') {
+                hideSuggestions();
+            }
+        });
+
+        // CLICK SUGGESTION
+        suggestionsBox.addEventListener('click', (event) => {
+            const button = event.target.closest('.search-suggestion');
+            if (!button) return;
+
+            searchInput.value = button.dataset.name || '';
             hideSuggestions();
-        }
+
+            form.action = getSearchType() === 'category'
+                ? '/categories'
+                : '/things';
+
+            form.submit();
+        });
+
+        // SUBMIT
+        form.addEventListener('submit', (event) => {
+            const query = searchInput.value.trim();
+            if (!query) return;
+
+            form.action = getSearchType() === 'category'
+                ? '/categories'
+                : '/things';
+        });
+
+        // OUTSIDE CLICK (scoped per form)
+        document.addEventListener('click', (event) => {
+            if (!form.contains(event.target)) {
+                hideSuggestions();
+            }
+        });
     });
 });
