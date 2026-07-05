@@ -55,3 +55,22 @@ class SupabaseCategoryManager:
             return Category.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
+
+    def search_categories_by_name(
+        self, search_text: str, max_things: int = 3, min_sensitivity: float = 0.1
+    ):
+        try:
+            response = self.supabase.rpc(
+                "search_categories",
+                {
+                    "search_text": search_text,
+                    "max_things": max_things,
+                    "min_sensitivity": min_sensitivity,
+                },
+            ).execute()
+            items = []
+            for item in response.data:
+                items.append(Category.from_json(item))
+            return items
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
