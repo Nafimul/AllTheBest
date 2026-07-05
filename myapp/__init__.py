@@ -124,7 +124,8 @@ def create_app(env: str = "development") -> Flask:
         """Render the categories page with the current category list."""
         THINGS_TO_SHOW_PER_CATEGORY = 3
         categories_with_scores = score_manager.get_categories_with_scores(
-            scores_per_category=THINGS_TO_SHOW_PER_CATEGORY
+            num_scores_per_category=THINGS_TO_SHOW_PER_CATEGORY,
+            category_manager=category_manager
         )
         current_user_votes = get_current_user_votes()
         return render_template(
