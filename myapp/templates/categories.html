@@ -4,7 +4,19 @@
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
 {% endblock %}
 {% block content %}
-    {% if categories_with_scores %}
+    {% if search_results %}
+        <h2>{% if search_query %}Matching Categories{% else %}Categories{% endif %}</h2>
+        {% if search_query %}
+            <p>Showing results for "{{ search_query }}".</p>
+        {% endif %}
+        <ul class="things-list">
+            {% for category in search_results %}
+            <li>
+                <a href="{{ url_for('show_category', name=category.name) }}">{{ category.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% elif categories_with_scores %}
         {% for key, value in categories_with_scores.items() %}
             <article class="{{ 'negative' if key.is_negative else '' }}" id="{{ key.name }}">
                 <h2><a href="{{ url_for('show_category', name=key.name) }}">{{ key.name }}</a></h2>

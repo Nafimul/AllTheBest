@@ -28,6 +28,30 @@
             <li><a href='/signup'>Signup</a></li>
         </ul>
 
+        <form id="global-search-form" class="search-bar" action="/things" method="get">
+            <label class="search-radio">
+                <input type="radio" name="search-type" value="thing" checked>
+                Thing
+            </label>
+            <label class="search-radio">
+                <input type="radio" name="search-type" value="category">
+                Category
+            </label>
+            <div class="search-input-wrapper">
+                <input
+                    id="global-search-input"
+                    type="text"
+                    name="q"
+                    placeholder="Search things or categories"
+                    autocomplete="off"
+                >
+                <div id="global-search-suggestions" class="search-suggestions" role="listbox"></div>
+            </div>
+            <button type="submit">Search</button>
+        </form>
+
+        <script type="module" src='{{ url_for("static", filename="scripts/search.js") }}'></script>
+
         {% block content %}{% endblock %}
     </body>
 </html>

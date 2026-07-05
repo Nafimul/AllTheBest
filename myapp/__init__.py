@@ -122,17 +122,58 @@ def create_app(env: str = "development") -> Flask:
     @app.route("/categories")
     def list_categories() -> str:
         """Render the categories page with the current category list."""
+        query = request.args.get("q", "").strip()
+        current_user_votes = get_current_user_votes()
+
+        if query:
+            matching_categories = category_manager.search_categories_by_name(
+                query,
+                max_things=10,
+                min_similarity=0.1,
+            )
+            return render_template(
+                "categories.html",
+                categories_with_scores={},
+                current_user_votes=current_user_votes,
+                search_query=query,
+                search_results=matching_categories,
+            )
+
         THINGS_TO_SHOW_PER_CATEGORY = 3
         categories_with_scores = score_manager.get_categories_with_scores(
             num_scores_per_category=THINGS_TO_SHOW_PER_CATEGORY,
             category_manager=category_manager,
         )
-        current_user_votes = get_current_user_votes()
         return render_template(
             "categories.html",
             categories_with_scores=categories_with_scores,
             current_user_votes=current_user_votes,
+            search_query=query,
+            search_results=[],
         )
+
+    @app.route("/api/search")
+    def search() -> tuple[list[dict], int]:
+        """Return search suggestions for things or categories."""
+        search_type = request.args.get("type", "thing")
+        search_text = request.args.get("q", "")
+
+        if search_type == "category":
+            categories = category_manager.search_categories_by_name(
+                search_text,
+                max_things=5,
+                min_similarity=0.1,
+            )
+            return [
+                {"name": category.name, "type": "category"} for category in categories
+            ], 200
+
+        things = thing_manager.search_things_by_name(
+            search_text,
+            max_things=5,
+            min_similarity=0.1,
+        )
+        return [{"name": thing.name, "type": "thing"} for thing in things], 200
 
     @app.route("/users")
     def list_users() -> str:
@@ -151,12 +192,21 @@ def create_app(env: str = "development") -> Flask:
 
     @app.route("/things")
     def list_things() -> str:
-        """Render a page with all things."""
-        things = thing_manager.get_things()
+        """Render a page with all things or search results."""
+        query = request.args.get("q", "").strip()
+        if query:
+            things = thing_manager.search_things_by_name(
+                query,
+                max_things=10,
+                min_similarity=0.1,
+            )
+        else:
+            things = thing_manager.get_things()
 
         return render_template(
             "things.html",
             things=things,
+            search_query=query,
         )
 
     @app.route("/categories/<string:name>", methods=["GET"])
@@ -187,7 +237,9 @@ def create_app(env: str = "development") -> Flask:
 
         first_thing_img_path = None
         if len(rows) > 0:
-            first_thing_img_path = thing_manager.get_thing(rows[0]["thing_name"]).img_path
+            first_thing_img_path = thing_manager.get_thing(
+                rows[0]["thing_name"]
+            ).img_path
 
         return render_template(
             "category.html",

@@ -1,22 +1,22 @@
 {% extends 'base.html' %}
-{% from 'partials/thing_cards.html' import render_thing_card %}
 {% block title %}Things{% endblock %}
 {% block file_links %}
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
 {% endblock %}
 {% block content %}
-    <h2>All Things</h2>
+    <h2>{% if search_query %}Matching Things{% else %}All Things{% endif %}</h2>
+    {% if search_query %}
+        <p>Showing results for "{{ search_query }}".</p>
+    {% endif %}
     {% if things %}
         <ul class="things-list">
             {% for thing in things %}
-            <a href="{{ url_for('show_thing', name=thing_name) }}">
-                <li>
-                    {{ thing.name }}
-                </li>
-            </a>
+            <li>
+                <a href="{{ url_for('show_thing', name=thing.name) }}">{{ thing.name }}</a>
+            </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>No things yet.</p>
+        <p>No things found.</p>
     {% endif %}
 {% endblock %}

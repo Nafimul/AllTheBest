@@ -57,7 +57,7 @@ class SupabaseCategoryManager:
             raise ConnectionError(str(e)) from e
 
     def search_categories_by_name(
-        self, search_text: str, max_things: int = 3, min_sensitivity: float = 0.1
+        self, search_text: str, max_things: int = 3, min_similarity: float = 0.1
     ):
         try:
             response = self.supabase.rpc(
@@ -65,7 +65,7 @@ class SupabaseCategoryManager:
                 {
                     "search_text": search_text,
                     "max_things": max_things,
-                    "min_sensitivity": min_sensitivity,
+                    "min_similarity": min_similarity,
                 },
             ).execute()
             items = []
