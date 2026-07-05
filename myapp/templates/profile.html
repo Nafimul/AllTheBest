@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% from 'partials/thing_cards.html' import render_thing_card %}
+{% from 'partials/profile_thing_card.html' import render_profile_thing_card %}
 {% block title %} {{ user.name }}'s Profile {% endblock %}
 {% block file_links %}
   <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
@@ -7,10 +7,10 @@
 {% block content %}
 <h1>{{ user.name }}'s Profile</h1>
 
-{% if profile_things %}
+{% if things_with_votes %}
   <ul class="profile-things">
-    {% for entry in profile_things %}
-      {{ render_thing_card(entry, current_user_votes) }}
+    {% for key, value in things_with_votes.items() %}
+      {{ render_profile_thing_card(key, value, current_user_votes) }}
     {% endfor %}
   </ul>
 {% else %}

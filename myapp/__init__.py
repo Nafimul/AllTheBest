@@ -1,7 +1,7 @@
 import secrets
 import os
 import uuid
-from typing import Any, Optional
+from typing import Any, Dict, List, Optional
 
 from flask import Flask, flash, json, render_template, request
 from dotenv import load_dotenv
@@ -451,72 +451,13 @@ def create_app(env: str = "development") -> Flask:
     def profile_by_id(id: str) -> str:
         """Render the current user's profile with their vote history."""
         user = user_manager.get_profile_by_id(id)
-        user_votes = vote_manager.get_by_user_id(id)
-
+        things_with_votes = score_manager.get_things_with_votes(id)
         current_user_votes = get_current_user_votes()
-
-        # Build spoiler mapping used to determine when to hide links
-        spoiler_for_by_thing = _build_spoiler_for_by_thing(score_manager.get_all())
-
-        # Build profile view entries grouped by thing page. For each thing in the system,
-        # include it if this user has voted for that thing or any descendant; collect
-        # the categories (and specific source thing names) that the user voted in.
-        all_things = thing_manager.get_things()
-        profile_things: list[dict[str, Any]] = []
-
-        for root in all_things:
-            # gather descendants for this root
-            descendant_names: set[str] = set()
-            visited: set[str] = set()
-            stack: list[str] = [root.name]
-            visited.add(root.name)
-            while stack:
-                current = stack.pop()
-                try:
-                    children = thing_manager.get_children(current)
-                except ConnectionError:
-                    children = []
-                for child in children:
-                    if child in visited:
-                        continue
-                    visited.add(child)
-                    descendant_names.add(child)
-                    stack.append(child)
-
-            subtree = set(descendant_names) | {root.name}
-
-            # find user's votes that target any thing in this subtree
-            matching_votes = [v for v in user_votes if v.thing_name in subtree]
-            if not matching_votes:
-                continue
-
-            # For each matching vote, collect category and source thing
-            category_entries: list[dict[str, Any]] = []
-            for v in matching_votes:
-                spoiler_for = spoiler_for_by_thing.get((v.thing_name, v.category_name))
-                category_entries.append(
-                    {
-                        "category_name": v.category_name,
-                        "source_thing": v.thing_name,
-                        "is_spoiler": bool(spoiler_for),
-                        "spoiler_for": spoiler_for,
-                    }
-                )
-
-            profile_things.append(
-                {
-                    "thing": root,
-                    "categories": category_entries,
-                }
-            )
-
-        # Sort by how many categories this user voted the thing in (desc)
-        profile_things.sort(key=lambda e: len(e["categories"]), reverse=True)
 
         return render_template(
             "profile.html",
             user=user,
-            profile_things=profile_things,
+            things_with_votes=things_with_votes,
             current_user_votes=current_user_votes,
         )
 

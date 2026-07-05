@@ -1,8 +1,9 @@
-from typing import Any, List, Optional
+from typing import Any, Dict, List, Optional
 import httpx
 
 from myapp.models.category import Category
 from myapp.models.score import Score
+from myapp.models.vote import Vote
 
 
 class SupabaseScoreManager:
@@ -70,5 +71,31 @@ class SupabaseScoreManager:
                     :scores_per_category
                 ]
             return categories_with_scores
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
+    def get_things_with_votes(self, user_id: str):
+        try:
+            response = (
+                self.supabase.from_("v_things_with_votes")
+                .select("*")
+                .eq("user_id", user_id)
+                .execute()
+            )
+
+            things_with_votes: Dict[str, List[Dict[str:str]]] = {}
+            for row in response.data:
+                print(row)
+                if row["thing_name"] not in things_with_votes:
+                    things_with_votes[row["thing_name"]] = []
+                things_with_votes[row["thing_name"]].append(row)
+
+            # sort by thing with most votes first
+            things_with_votes = dict(
+                sorted(things_with_votes.items(), key=lambda e: len(e[1]), reverse=True)
+            )
+
+            print(things_with_votes)
+            return things_with_votes
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
