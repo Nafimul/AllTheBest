@@ -1,10 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const forms = document.querySelectorAll('.search-bar');
+    const searchEls = document.querySelectorAll('.search-bar');
+    const globalsearchForm = document.getElementById("globalSearchForm");
 
-    forms.forEach((form) => {
-        const searchInput = form.querySelector('input[type="text"]');
-        const suggestionsBox = form.querySelector('.search-suggestions');
-        const searchTypeInputs = form.querySelectorAll('input[name="search-type"]');
+    searchEls.forEach((searchEl) => {
+        const searchInput = searchEl.querySelector('input[type="text"]');
+        const suggestionsBox = searchEl.querySelector('.search-suggestions');
+        const searchTypeInputs = searchEl.querySelectorAll('input[name="search-type"]');
 
         if (!searchInput || !suggestionsBox) return;
 
@@ -12,8 +13,8 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentSuggestions = [];
 
         const getSearchType = () => {
-            // 1. try radio buttons inside this form
-            const selectedRadio = form.querySelector('input[name="search-type"]:checked');
+            // 1. try radio buttons inside this searchEl
+            const selectedRadio = searchEl.querySelector('input[name="search-type"]:checked');
             if (selectedRadio) return selectedRadio.value;
 
             // 2. fallback to input class
@@ -126,7 +127,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (selected) {
                     searchInput.value = selected.name;
                     hideSuggestions();
-                    form.submit();
                 }
             }
 
@@ -142,27 +142,21 @@ document.addEventListener('DOMContentLoaded', () => {
 
             searchInput.value = button.dataset.name || '';
             hideSuggestions();
-
-            form.action = getSearchType() === 'category'
-                ? '/categories'
-                : '/things';
-
-            form.submit();
         });
 
         // SUBMIT
-        form.addEventListener('submit', (event) => {
+        globalsearchForm.addEventListener('submit', (event) => {
             const query = searchInput.value.trim();
             if (!query) return;
 
-            form.action = getSearchType() === 'category'
+            searchEl.action = getSearchType() === 'category'
                 ? '/categories'
                 : '/things';
-        });
+        }, { once: true });
 
-        // OUTSIDE CLICK (scoped per form)
+        // OUTSIDE CLICK (scoped per searchEl)
         document.addEventListener('click', (event) => {
-            if (!form.contains(event.target)) {
+            if (!searchEl.contains(event.target)) {
                 hideSuggestions();
             }
         });
