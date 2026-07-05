@@ -3,7 +3,7 @@ import os
 import uuid
 from typing import Any, Dict, List, Optional
 
-from flask import Flask, flash, json, render_template, request
+from flask import Flask, abort, flash, json, render_template, request
 from dotenv import load_dotenv
 import httpx
 from supabase import create_client
@@ -171,6 +171,10 @@ def create_app(env: str = "development") -> Flask:
         if env == "development":
             raise e
         return {"message": "Sorry. Connection issue on our end"}, 503
+
+    @app.errorhandler(404)
+    def handle_not_found(error):
+        return "404 not found", 404
 
     @app.errorhandler(Exception)
     def handle_unexpected(e: Exception):
@@ -465,25 +469,12 @@ def create_app(env: str = "development") -> Flask:
     def show_vote(user_id: str, category_name: str, thing_name: str) -> str:
         """Render a detailed page for a single vote."""
         vote = vote_manager.get_vote(user_id, category_name, thing_name)
-
         if vote is None:
-            return render_template("vote.html", vote=None)
+            abort(404)
 
-        # Get voter information
-        voter_name = "Unknown User"
-        try:
-            voter = user_manager.get_profile_by_id(user_id)
-            if voter:
-                voter_name = voter.name
-        except ConnectionError:
-            pass
-
-        # Get thing information
-        thing = None
-        try:
-            thing = thing_manager.get_thing(thing_name)
-        except ConnectionError:
-            pass
+        voter = user_manager.get_profile_by_id(user_id)
+        voter_name = voter.name
+        thing = thing_manager.get_thing(thing_name)
 
         # Check if this is a spoiler vote
         spoiler_for_by_thing = _build_spoiler_for_by_thing(score_manager.get_all())
