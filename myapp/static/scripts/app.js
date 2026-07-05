@@ -25,7 +25,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function handleSpoilerToggle(button) {
     const target = button.getAttribute("data-link-target") || "";
-    const thingName = button.getAttribute("data-thing-name") || "";
+    const spoilerWord = button.getAttribute("data-spoiler-word") || "";
     const spoilerFor = button.getAttribute("data-spoiler-for") || "";
     const isRevealed = button.dataset.revealed === "true";
 
@@ -35,7 +35,7 @@ function handleSpoilerToggle(button) {
     }
 
     button.dataset.revealed = "true";
-    button.textContent = thingName;
+    button.textContent = spoilerWord;
     button.classList.add("spoiler-revealed");
 
     const container = button.closest("li, tr, .profile-vote-card");

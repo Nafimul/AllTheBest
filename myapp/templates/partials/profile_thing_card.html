@@ -1,33 +1,36 @@
-{% macro render_profile_thing_card(thing_name, votes, current_user_votes, card_class='profile-thing-card') %}
+{% macro render_profile_thing_card(user_id, thing_name, votes, current_user_votes, card_class='profile-thing-card') %}
   <li class="{{ card_class }}">
-    {% if votes[0].img_path %}
-      <img class="profile-thing-image" src="{{ votes[0].img_path }}" alt="{{ thing_name }}">
-    {% else %}
-      <div class="profile-thing-image placeholder">No image</div>
-    {% endif %}
+    
+    <a href="{{ url_for('show_thing', name=thing_name) }}">
+      {% if votes[0].img_path %}
+          <img class="profile-thing-image" src="{{ votes[0].img_path }}" alt="{{ thing_name }}">
+      {% else %}
+        <div class="profile-thing-image placeholder">No image</div>
+      {% endif %}
+    </a>
 
+    <a href="{{ url_for('show_thing', name=thing_name) }}"> {{ thing_name }} </a>
     <div>
-      <a href="{{ url_for('show_thing', name=thing_name) }}">{{ thing_name }}</a>
       <ul class="profile-thing-categories">
         {% for vote in votes %}
           {% set spoiler_for = vote.spoiler_for if vote.spoiler_for is defined else None %}
           {% set is_spoiler = false if spoiler_for == '' else true %}
+
           <li>
             {% if is_spoiler %}
               <button
                 type="button"
                 class="spoiler-toggle"
                 data-spoiler-for="{{ spoiler_for }}"
-                data-thing-name="{{ thing_name }}"
-                data-link-target="{{ url_for('show_thing', name=thing_name) }}"
+                data-spoiler-word="{{ vote.category_name }}"
+                data-link-target="{{ url_for('show_category', name=vote.category_name) }}"
               >
                 CLICK TO SEE SPOILER FOR {{ spoiler_for }}
               </button>
             {% else %}
-              <a href="{{ url_for('show_thing', name=thing_name) }}">{{ thing_name }}</a>
+              <a href="{{ url_for('show_category', name=vote.category_name) }}">{{ vote.category_name }}</a>
             {% endif %}
-            &nbsp;in&nbsp;
-            <a href="{{ url_for('show_category', name=vote.category_name) }}">{{ vote.category_name }}</a>
+            <a href="{{ url_for('show_vote', thing_name=thing_name, category_name=vote.category_name, user_id=user_id) }}"> details</a>
 
             <button class="upvote_button" data-category="{{ vote.category_name }}" data-thing="{{ thing_name }}">
               <img

@@ -454,13 +454,13 @@ def create_app(env: str = "development") -> Flask:
     @app.route("/profile/<string:id>", methods=["GET"])
     def profile_by_id(id: str) -> str:
         """Render the current user's profile with their vote history."""
-        user = user_manager.get_profile_by_id(id)
+        profile = user_manager.get_profile_by_id(id)
         things_with_votes = score_manager.get_things_with_votes(id)
         current_user_votes = get_current_user_votes()
 
         return render_template(
             "profile.html",
-            user=user,
+            profile=profile,
             things_with_votes=things_with_votes,
             current_user_votes=current_user_votes,
         )
