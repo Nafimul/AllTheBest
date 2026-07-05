@@ -11,7 +11,19 @@
         <section id="thing">
             <h3> Thing </h3>
             <label for="thingName"> Name </label>
-            <input id="thingName" name="thingName" type="text" placeholder="Darth Vader">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input
+                        id="thingName vote-input"
+                        class="thing"
+                        type="text"
+                        name="thingName"
+                        placeholder="Darth Vader"
+                        autocomplete="off"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+            </div>
 
             <div id="fromThings">
                 <button type="button" id="fromThingButton"> Add From Thing </button>
@@ -35,7 +47,19 @@
                 <option value="LEAST">LEAST</option>
                 <option value=""></option>
             </select>
-            <input id="categoryName" name="categoryName" type="text" placeholder="identity reveal">
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input
+                        class="category vote-input"
+                        id="categoryName"
+                        type="text"
+                        name="categoryName"
+                        placeholder="identity reveal"
+                        autocomplete="off"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+            </div>
 
             <label for="categoryIsSpoiler"> Spoiler Type Category? </label>
             <input id="categoryIsSpoiler" name="categoryIsSpoiler" type="checkbox">

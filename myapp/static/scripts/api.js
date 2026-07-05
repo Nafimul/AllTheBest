@@ -23,6 +23,38 @@ export async function postVote(categoryName, thingName)
     return success;
 }
 
+export async function getThingJson(thingName)
+{
+    try {
+        const response = await fetch("/api/thing/" + encodeURIComponent(thingName),
+                                    {
+                                        method: "GET",
+                                    });
+        if (!response.ok)
+            return null;
+
+        return await response.json();
+    } catch (error) {
+        return null;
+    }
+}
+
+export async function getCategoryJson(categoryName)
+{
+    try {
+        const response = await fetch("/api/category/" + encodeURIComponent(categoryName),
+                                    {
+                                        method: "GET",
+                                    });
+        if (!response.ok)
+            return null;
+
+        return await response.json();
+    } catch (error) {
+        return null;
+    }
+}
+
 export async function deleteVote(categoryName)
 {
     const formData = new FormData();

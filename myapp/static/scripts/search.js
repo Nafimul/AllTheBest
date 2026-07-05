@@ -1,6 +1,28 @@
+"use strict";
+
+import { getThingJson, getCategoryJson } from "./api.js";
+
 document.addEventListener('DOMContentLoaded', () => {
     const searchEls = document.querySelectorAll('.search-bar');
     const globalsearchForm = document.getElementById("globalSearchForm");
+
+    async function autofillThingForm(thingName) {
+        const imagePreview = thingForm.getElementById("imagePreview");
+        const thingJson = await getThingJson(thingName);
+        if (!thingJson)
+            return;
+        imagePreview.src = thingJson["img_path"];
+    }
+
+    async function autofillCategoryForm(categoryName) {
+        const addForm = document.getElementById("addForm");
+        const categoryJson = await getCategoryJson(categoryName);
+        if (!categoryJson)
+            return;
+        addForm.querySelector('input[name="categoryIsSpoiler"]').checked = categoryJson["is_spoiler"];
+        addForm.querySelector('input[name="categoryIsNegative"]').checked = categoryJson["is_negative"];
+        addForm.querySelector('input[name="categoryDesc"]').value = categoryJson["desc"];
+    }
 
     searchEls.forEach((searchEl) => {
         const searchInput = searchEl.querySelector('input[type="text"]');
@@ -11,6 +33,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
         let activeIndex = -1;
         let currentSuggestions = [];
+
+        const autofillForms = (searchTerm) => {
+                console.log("out");
+            if (searchInput.classList.contains("vote-input")) {
+                console.log("oidfnanfio");
+                if (searchInput.classList.contains("thing")) {
+                    autofillThingForm(searchTerm);
+                } else if (searchInput.classList.contains("category")) {
+                    autofillCategoryForm(searchTerm);
+                }
+            }
+        }
 
         const getSearchType = () => {
             // 1. try radio buttons inside this searchEl
@@ -126,6 +160,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selected = currentSuggestions[activeIndex];
                 if (selected) {
                     searchInput.value = selected.name;
+                    autofillForms(selected.name);
                     hideSuggestions();
                 }
             }
@@ -141,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!button) return;
 
             searchInput.value = button.dataset.name || '';
+            autofillForms(button.dataset.name || '');
             hideSuggestions();
         });
 
