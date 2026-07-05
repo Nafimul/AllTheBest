@@ -159,6 +159,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const selected = currentSuggestions[activeIndex];
                 if (selected) {
                     searchInput.value = selected.name;
+                    // for event listeners in other js files to still activate (like the ones for category inputs)
+                    searchInput.dispatchEvent(new Event("change", { bubbles: true }));
                     autofillForms(selected.name);
                     hideSuggestions();
                 }
@@ -175,6 +177,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!button) return;
 
             searchInput.value = button.dataset.name || '';
+            // for event listeners in other js files to still activate (like the ones for category inputs)
+            searchInput.dispatchEvent(new Event("change", { bubbles: true }));
             autofillForms(button.dataset.name || '');
             hideSuggestions();
         });

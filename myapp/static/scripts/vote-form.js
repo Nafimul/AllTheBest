@@ -29,13 +29,28 @@ document.addEventListener("DOMContentLoaded", function() {
     const imagePreview = document.getElementById("imagePreview");
     const categoryIsNegativeEl = document.getElementById("categoryIsNegative");
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
+    const categoryNameEl = document.getElementById("categoryName");
     const fromThingInput = document.getElementById("fromThingNames");
     const addFromThingButton = document.getElementById("fromThingButton");
 
     categoryNamePrefixEl.addEventListener("change", changeIsNegative);
     thingImage.addEventListener("change", previewImage);
     form.addEventListener("submit", submit);
+    categoryNameEl.addEventListener("change", removeExtraPrefix);
     addFromThingButton.addEventListener("click", addFromThingInput)
+
+    function removeExtraPrefix(e) {
+        let categoryName = e.currentTarget.value;
+        const BUILTINPREFIXES = ["LEAST FAVORITE", "FAVORITE", "LEAST", "MOST"];
+        BUILTINPREFIXES.forEach( prefix => {
+            console.log(prefix);
+            if (categoryName.includes(prefix)) {
+                categoryNamePrefixEl.value = prefix;
+                e.currentTarget.value = categoryName.replace(prefix, "");
+                console.log(categoryName.replace(prefix, ""));
+            };
+        });
+    }
 
     function changeIsNegative(e) {
         if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")
