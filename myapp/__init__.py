@@ -159,6 +159,13 @@ def create_app(env: str = "development") -> Flask:
     vote_manager = SupabaseVoteManager(supabase_client)
     score_manager = SupabaseScoreManager(supabase_client)
 
+    def get_current_user_votes():
+        current_user_votes = {}
+        if current_user.is_authenticated:
+            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
+            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        return current_user_votes
+
     @app.errorhandler(ConnectionError)
     def handle_connection_error(e: ConnectionError):
         if env == "development":
@@ -195,10 +202,7 @@ def create_app(env: str = "development") -> Flask:
         categories_with_scores = score_manager.get_categories_with_scores(
             scores_per_category=THINGS_TO_SHOW_PER_CATEGORY
         )
-        current_user_votes = []
-        if current_user.is_authenticated:
-            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        current_user_votes = get_current_user_votes()
         return render_template(
             "categories.html",
             categories_with_scores=categories_with_scores,
@@ -278,10 +282,7 @@ def create_app(env: str = "development") -> Flask:
                 {"thing": thing, "thing_scores": thing_scores[:3]}
             )
 
-        current_user_votes = {}
-        if current_user.is_authenticated:
-            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        current_user_votes = get_current_user_votes()
 
         return render_template(
             "things.html",
@@ -313,10 +314,7 @@ def create_app(env: str = "development") -> Flask:
                 }
             )
 
-        current_user_votes = {}
-        if current_user.is_authenticated:
-            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        current_user_votes = get_current_user_votes()
 
         return render_template(
             "category.html",
@@ -342,10 +340,7 @@ def create_app(env: str = "development") -> Flask:
 
         scores = sorted(scores, key=lambda score: (-score.num_votes))
 
-        current_user_votes = {}
-        if current_user.is_authenticated:
-            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        current_user_votes = get_current_user_votes()
 
         return render_template(
             "thing.html",
@@ -458,10 +453,7 @@ def create_app(env: str = "development") -> Flask:
         user = user_manager.get_profile_by_id(id)
         user_votes = vote_manager.get_by_user_id(id)
 
-        current_user_votes = {}
-        if current_user.is_authenticated:
-            current_user_vote_objects = vote_manager.get_by_user_id(current_user.id)
-            current_user_votes = build_current_user_votes(current_user_vote_objects)
+        current_user_votes = get_current_user_votes()
 
         # Build spoiler mapping used to determine when to hide links
         spoiler_for_by_thing = _build_spoiler_for_by_thing(score_manager.get_all())
