@@ -19,7 +19,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const categoryJson = await getCategoryJson(categoryName);
         if (!categoryJson)
             return;
-        addForm.querySelector('input[name="categoryIsSpoiler"]').checked = categoryJson["is_spoiler"];
         addForm.querySelector('input[name="categoryIsNegative"]').checked = categoryJson["is_negative"];
         addForm.querySelector('input[name="categoryDesc"]').value = categoryJson["desc"];
     }

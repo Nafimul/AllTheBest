@@ -198,7 +198,6 @@ def create_app(env: str = "development") -> Flask:
         return {
             "name": category.name,
             "desc": category.desc,
-            "is_spoiler": category.is_spoiler,
             "is_negative": category.is_negative,
         }, 200
 

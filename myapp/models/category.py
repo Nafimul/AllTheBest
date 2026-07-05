@@ -6,13 +6,11 @@ class Category:
         self,
         name: str,
         created_at: Optional[str] = None,
-        is_spoiler: bool = False,
         desc: Optional[str] = None,
         is_negative: bool = False,
     ) -> None:
         if (
             (created_at and not isinstance(created_at, str))
-            or (not isinstance(is_spoiler, bool))
             or (desc and not isinstance(desc, str))
             or not isinstance(name, str)
             or (not isinstance(is_negative, bool))
@@ -21,7 +19,6 @@ class Category:
 
         self.created_at = created_at
         self.name = name
-        self.is_spoiler = is_spoiler
         self.desc = desc
         self.is_negative = is_negative
 
@@ -30,7 +27,6 @@ class Category:
         return cls(
             name=data.get("name"),
             created_at=data.get("created_at"),
-            is_spoiler=bool(data.get("is_spoiler", False)),
             desc=data.get("desc"),
             is_negative=bool(data.get("is_negative", False)),
         )
@@ -39,7 +35,6 @@ class Category:
         return {
             "name": self.name,
             "created_at": self.created_at,
-            "is_spoiler": self.is_spoiler,
             "desc": self.desc,
             "is_negative": self.is_negative,
         }
@@ -54,7 +49,6 @@ class Category:
 
         return cls(
             name=category_name,
-            is_spoiler=bool(request.form.get("categoryIsSpoiler")),
             desc=request.form.get("categoryDesc"),
             is_negative=bool(request.form.get("categoryIsNegative")),
         )
