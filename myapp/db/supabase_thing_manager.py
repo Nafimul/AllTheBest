@@ -190,6 +190,28 @@ class SupabaseThingManager:
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
 
+    def get_from_thing_names(self, thing_name: str) -> list[str]:
+        """Return the list of parent/related thing names for a thing."""
+        if not isinstance(thing_name, str):
+            raise TypeError("thing_name must be a string")
+
+        try:
+            response = (
+                self.supabase.table("from_things")
+                .select("from_thing_name")
+                .filter("thing_name", "eq", thing_name)
+                .execute()
+            )
+            if not response.data:
+                return []
+            return [
+                item.get("from_thing_name")
+                for item in response.data
+                if item.get("from_thing_name")
+            ]
+        except httpx.HTTPError as e:
+            raise ConnectionError(str(e)) from e
+
     def search_things_by_name(
         self, search_text: str, max_things: int = 3, min_similarity: float = 0.1
     ):
