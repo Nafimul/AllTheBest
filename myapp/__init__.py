@@ -41,18 +41,6 @@ def _rank_suffix(rank: int) -> str:
     return "th"
 
 
-# Return the 1-based rank of the given score within its category score list.
-def _resolve_category_rank(score: Score, category_scores: list[Score]) -> int:
-    return next(
-        (
-            index + 1
-            for index, item in enumerate(category_scores)
-            if item.thing_name == score.thing_name
-        ),
-        len(category_scores),
-    )
-
-
 def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[tuple[str, str], str]:
     """Return a mapping of (thing name, category name) pairs to spoiler labels."""
     spoiler_for_by_thing: dict[tuple[str, str], str] = {}
@@ -64,77 +52,9 @@ def _build_spoiler_for_by_thing(scores: list[Score]) -> dict[tuple[str, str], st
     return spoiler_for_by_thing
 
 
-def build_score_row(
-    score: Score,
-    category_scores: list[Score],
-    spoiler_for_by_thing: Optional[dict[tuple[str, str], str]] = None,
-) -> dict[str, Any]:
-    """Build a score row with rank and spoiler metadata for a single score."""
-    rank = _resolve_category_rank(
-        score, sorted(category_scores, key=lambda item: item.num_votes, reverse=True)
-    )
-    spoiler_lookup = spoiler_for_by_thing or {}
-    spoiler_for = spoiler_lookup.get((score.thing_name, score.category_name))
-    return {
-        "category_name": score.category_name,
-        "num_votes": score.num_votes,
-        "rank_text": f"{rank}{_rank_suffix(rank)}",
-        "is_first": rank == 1,
-        "source_thing": score.thing_name,
-        "is_spoiler": bool(spoiler_for),
-        "spoiler_for": spoiler_for,
-    }
-
-
-# Build a list of score rows for a thing, sorted with first-place categories first.
-# name: thing name to filter on, scores: all category scores.
-def _build_thing_scores(name: str, scores: list[Score]) -> list[dict[str, Any]]:
-    categories_by_name: dict[str, list[Score]] = {}
-    for score in scores:
-        categories_by_name.setdefault(score.category_name, []).append(score)
-
-    thing_scores: list[dict[str, Any]] = []
-    for score in filter(lambda s: s.thing_name == name, scores):
-        thing_scores.append(
-            build_score_row(
-                score,
-                categories_by_name[score.category_name],
-            )
-        )
-
-    return sorted(
-        thing_scores, key=lambda row: (0 if row["is_first"] else 1, -row["num_votes"])
-    )
-
-
 def build_current_user_votes(votes: list[Vote]) -> dict[str, str]:
     """Return a mapping of category names to the thing currently voted for."""
     return {vote.category_name: vote.thing_name for vote in votes}
-
-
-def build_profile_vote_entries(
-    votes: list[Vote],
-    thing_manager: Any,
-    spoiler_for_by_thing: Optional[dict[tuple[str, str], str]] = None,
-) -> list[dict[str, Any]]:
-    """Return vote entries sorted with favorite votes first and enriched with thing data."""
-    sorted_votes = sorted(votes, key=lambda vote: vote.is_favorite, reverse=True)
-    entries = []
-    spoiler_lookup = spoiler_for_by_thing or {}
-    for vote in sorted_votes:
-        thing = None
-        if thing_manager is not None:
-            thing = thing_manager.get_thing(vote.thing_name)
-        spoiler_for = spoiler_lookup.get((vote.thing_name, vote.category_name))
-        entries.append(
-            {
-                "vote": vote,
-                "thing": thing,
-                "spoiler_for": spoiler_for,
-                "is_spoiler": bool(spoiler_for),
-            }
-        )
-    return entries
 
 
 def create_app(env: str = "development") -> Flask:
