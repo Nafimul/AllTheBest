@@ -16,7 +16,7 @@
           {% set spoiler_for = vote.spoiler_for if vote.spoiler_for is defined else None %}
           {% set is_spoiler = false if spoiler_for == '' else true %}
 
-          <li>
+          <li class="{{ 'favorite' if votes[0].is_favorite else ''}}">
             {% if is_spoiler %}
               <button
                 type="button"
