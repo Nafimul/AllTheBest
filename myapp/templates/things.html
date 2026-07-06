@@ -4,7 +4,6 @@
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
 {% endblock %}
 {% block content %}
-    <h2>{% if search_query %}Matching Things{% else %}All Things{% endif %}</h2>
     {% if search_query %}
         <p>Showing results for "{{ search_query }}".</p>
     {% endif %}
