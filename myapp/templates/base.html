@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
     <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
         <script type='text/javascript' src='{{ url_for("static", filename="scripts/app.js") }}'></script>
         <script type="module" src='{{ url_for("static", filename="scripts/search.js") }}'></script>
         <link rel="stylesheet" type='text/css' href='{{ url_for("static", filename="styles/styles.css") }}'/>
@@ -54,6 +56,8 @@
             <button type="submit">Search</button>
         </form>
 
-        {% block content %}{% endblock %}
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
     </body>
 </html>
