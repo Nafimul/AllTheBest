@@ -25,8 +25,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const thingJson = await getThingJson(thingName);
             if (!thingJson)
                 return;
-if (thingJson["img_path"])
-            imagePreview.src = thingJson["img_path"];
+            if (thingJson["img_path"])
+                imagePreview.src = thingJson["img_path"];
         }
 
         if (!searchInput || !suggestionsBox) return;
@@ -36,7 +36,9 @@ if (thingJson["img_path"])
 
         const autofillForms = (searchTerm) => {
             if (searchInput.classList.contains("vote-input")) {
-                if (searchInput.classList.contains("thing")) {
+                if (searchInput.classList.contains("fromThing")) {
+                    return;
+                } else if (searchInput.classList.contains("thing")) {
                     autofillThingForm(searchTerm);
                 } else if (searchInput.classList.contains("category")) {
                     autofillCategoryForm(searchTerm);

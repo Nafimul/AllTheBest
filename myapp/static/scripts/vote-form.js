@@ -20,20 +20,22 @@ document.addEventListener("DOMContentLoaded", function() {
 
     categoryNamePrefixEl.addEventListener("change", changeIsNegative);
     thingImage.addEventListener("change", previewImage);
-    form.addEventListener("submit", e => submitVoteForm(e));
+    form.addEventListener("submit", submitVoteForm);
     categoryNameEl.addEventListener("change", removeExtraPrefix);
     addFromThingButton.addEventListener("click", e => addFromThingInput(document.getElementById("fromThings").querySelector(".search-input-wrapper")));
 
-    function removeExtraPrefix(e) {
-        let categoryName = e.currentTarget.value;
+    function removeExtraPrefix() {
+        let categoryName = categoryNameEl.value;
         const BUILTINPREFIXES = ["LEAST FAVORITE ", "FAVORITE ", "LEAST ", "MOST "];
         BUILTINPREFIXES.forEach( prefix => {
-            if (categoryName.includes(prefix)) {
-                categoryNamePrefixEl.value = prefix;
-                e.currentTarget.value = categoryName.replace(prefix, "");
+            if ( categoryName && categoryName.startsWith(prefix)) {
+                categoryNamePrefixEl.value = prefix.trim();
+                categoryNameEl.value = categoryName.replace(prefix, "");
+                return;
             };
         });
     }
+    removeExtraPrefix();
 
     function changeIsNegative(e) {
         if (e.target.value === "LEAST FAVORITE" || e.target.value === "LEAST")

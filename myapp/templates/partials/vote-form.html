@@ -1,26 +1,11 @@
 {% macro render_vote_form(category, thing, from_thing_names) %}
-    {% if category %}
-        {% if category.name.startswith('LEAST FAVORITE') %}
-            {% set category_name_without_prefix = category.name | replace('LEAST FAVORITE ', '') %}
-            {% set category_prefix = 'LEAST FAVORITE' %}
-        {% elif category.name.startswith('FAVORITE') %}
-            {% set category_name_without_prefix = category.name | replace('FAVORITE ', '') %}
-            {% set category_prefix = 'FAVORITE' %}
-        {% elif category.name.startswith('MOST') %}
-            {% set category_name_without_prefix = category.name | replace('MOST ', '') %}
-            {% set category_prefix = 'MOST' %}
-        {% elif category.name.startswith('LEAST') %}
-            {% set category_name_without_prefix = category.name | replace('LEAST ', '') %}
-            {% set category_prefix = 'LEAST' %}
-        {% endif %}
-    {% endif %}
     <script type='module' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
 
-    <form method="POST" id="addForm" class="search-el">
+    <form method="POST" id="addForm">
         <h2> Add a thing or category </h2>
         <h2> Add both at once to submit a vote </h2>
 
-        <section id="thing">
+        <section id="thing" class="search-el">
             <h3> Thing </h3>
             <label for="thingName"> Name </label>
             <div class="search-input-wrapper">
@@ -45,16 +30,18 @@
                     {% set num_from_thing_inputs = 1 %}
                 {% endif %}
                 {% for i in range(num_from_thing_inputs) %}
-                    <div class="search-input-wrapper">
-                        <input
-                            class="thing vote-input"
-                            type="text"
-                            name="fromThingNames"
-                            placeholder="Star Wars"
-                            autocomplete="off"
-                            value="{{ from_thing_names[i] }}"
-                        >
-                        <div class="search-suggestions" role="listbox"></div>
+                    <div class="search-el">
+                        <div class="search-input-wrapper">
+                            <input
+                                class="thing vote-input fromThing"
+                                type="text"
+                                name="fromThingNames"
+                                placeholder="Star Wars"
+                                autocomplete="off"
+                                value="{{ from_thing_names[i] }}"
+                            >
+                            <div class="search-suggestions" role="listbox"></div>
+                        </div>
                     </div>
                 {% endfor %}
             </div>
@@ -65,7 +52,7 @@
                 src="{{ thing.img_path }}">
         </section>
 
-        <section id="category">
+        <section id="category" class="search-el">
             <h3> Category </h3>
             <label for="categoryName"> Name </label>
             <select name="categoryNamePrefix" id="categoryNamePrefix">
