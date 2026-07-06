@@ -294,11 +294,15 @@ def create_app(env: str = "development") -> Flask:
 
         current_user_votes = get_current_user_votes()
 
+        from_thing_names = thing_manager.get_from_thing_names(thing.name)
+        print(from_thing_names)
+
         return render_template(
             "thing.html",
             thing=thing,
             thing_scores=scores,
             current_user_votes=current_user_votes,
+            from_thing_names=from_thing_names,
         )
 
     @app.route("/add-things")

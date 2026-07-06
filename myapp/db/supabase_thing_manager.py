@@ -83,6 +83,10 @@ class SupabaseThingManager:
         try:
             row_json = thing.to_json()
             row_json.pop("created_at", None)
+            # don't override image if no new image being posted
+            if img_file is None:
+                row_json.pop("img_path")
+
             response = self.supabase.table("things").upsert(row_json).execute()
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:

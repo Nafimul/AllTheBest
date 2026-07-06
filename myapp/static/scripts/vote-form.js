@@ -2,7 +2,7 @@
 import { sendFormToApi } from "./api.js";
 
 export function addFromThingInput(inputEl) {
-    const clone = inputEl.cloneNode(false);
+    const clone = inputEl.cloneNode(true);
     clone.value = "";
     clone.id = null;
     inputEl.parentElement.appendChild(clone);
@@ -30,14 +30,14 @@ document.addEventListener("DOMContentLoaded", function() {
     const categoryIsNegativeEl = document.getElementById("categoryIsNegative");
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
     const categoryNameEl = document.getElementById("categoryName");
-    const fromThingInput = document.getElementById("fromThingNames");
+    const fromThingInput = document.getElementsByClassName("fromThingNames")[0];
     const addFromThingButton = document.getElementById("fromThingButton");
 
     categoryNamePrefixEl.addEventListener("change", changeIsNegative);
     thingImage.addEventListener("change", previewImage);
     form.addEventListener("submit", submit);
     categoryNameEl.addEventListener("change", removeExtraPrefix);
-    addFromThingButton.addEventListener("click", addFromThingInput)
+    addFromThingButton.addEventListener("click", e => addFromThingInput(addFromThingButton.parentElement.lastElementChild));
 
     function removeExtraPrefix(e) {
         let categoryName = e.currentTarget.value;
@@ -74,7 +74,6 @@ document.addEventListener("DOMContentLoaded", function() {
     async function submit(e) {
         e.preventDefault();
         const formData = new FormData(form);
-        console.log(document.getElementById("categoryDesc").value);
 
         const categoryNameWithoutPrefix = formData.get("categoryName");
         const categoryNamePrefix = formData.get("categoryNamePrefix");

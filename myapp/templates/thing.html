@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'partials/vote-form.html' import render_vote_form %}
 {% block title %}Thing{% endblock %}
 {% block file_links %}
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
@@ -54,6 +55,7 @@
                 <p>This thing does not yet have any scores.</p>
             {% endif %}
         </section>
+        {{ render_vote_form(None, thing, from_thing_names) }}
     {% else %}
         <p>Thing not found.</p>
     {% endif %}

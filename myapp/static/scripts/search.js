@@ -3,16 +3,10 @@
 import { getThingJson, getCategoryJson } from "./api.js";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const searchEls = document.querySelectorAll('.search-bar');
+    const searchEls = document.querySelectorAll('.search-el');
     const globalsearchForm = document.getElementById("globalSearchForm");
 
-    async function autofillThingForm(thingName) {
-        const imagePreview = thingForm.getElementById("imagePreview");
-        const thingJson = await getThingJson(thingName);
-        if (!thingJson)
-            return;
-        imagePreview.src = thingJson["img_path"];
-    }
+    
 
     async function autofillCategoryForm(categoryName) {
         const addForm = document.getElementById("addForm");
@@ -27,6 +21,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchInput = searchEl.querySelector('input[type="text"]');
         const suggestionsBox = searchEl.querySelector('.search-suggestions');
         const searchTypeInputs = searchEl.querySelectorAll('input[name="search-type"]');
+
+        async function autofillThingForm(thingName) {
+            const imagePreview = searchEl.querySelector("#imagePreview");
+            const thingJson = await getThingJson(thingName);
+            if (!thingJson)
+                return;
+            imagePreview.src = thingJson["img_path"];
+        }
 
         if (!searchInput || !suggestionsBox) return;
 
