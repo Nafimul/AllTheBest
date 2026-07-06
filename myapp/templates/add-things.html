@@ -15,8 +15,8 @@
             <div class="form-card">
                 <h3>Thing</h3>
 
-                <label for="thingName">Name</label>
-                <div class="search-input-wrapper">
+                <div class="search-input-wrapper" class="relatedFormItems">
+                    <label for="thingName">Name</label>
                     <input
                         id="thingName"
                         class="thing vote-input"
@@ -28,19 +28,23 @@
                     <div class="search-suggestions" role="listbox"></div>
                 </div>
 
-                <label>
-                    From
-                    <div class="from-things">
-                        <button type="button" class="add-from-thing-button">Add From Thing</button>
-                        <input name="fromThingNames" type="text" placeholder="Star Wars">
-                    </div>
-                </label>
-
-                <label>
-                    Image
-                    <input name="thingImage" type="file" accept="image/*">
-                </label>
-                <img class="imagePreview" alt="Image preview will appear here">
+                <div class="relatedFormItems">
+                    <label>
+                        From
+                        <div class="from-things">
+                            <button type="button" class="add-from-thing-button">Add From Thing</button>
+                            <input name="fromThingNames" type="text" placeholder="Star Wars">
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="relatedFormItems">
+                    <label>
+                        Image
+                        <input name="thingImage" type="file" accept="image/*">
+                    </label>
+                    <img class="imagePreview" alt="Image preview will appear here">
+                </div>
 
                 <p class="formMessage"></p>
                 <button>Add Thing</button>

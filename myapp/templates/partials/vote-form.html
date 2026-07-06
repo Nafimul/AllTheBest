@@ -7,8 +7,8 @@
 
         <section id="thing" class="search-el">
             <h3> Thing </h3>
-            <label for="thingName"> Name </label>
-            <div class="search-input-wrapper">
+            <div class="search-input-wrapper relatedFormItems">
+                <label for="thingName"> Name </label>
                 <input
                     id="thingName"
                     class="thing vote-input"
@@ -21,7 +21,7 @@
                 <div class="search-suggestions" role="listbox"></div>
             </div>
 
-            <div id="fromThings">
+            <div id="fromThings" class="relatedFormItems">
                 <button type="button" id="fromThingButton"> Add From Thing </button>
                 <label for="fromThingNames"> From </label>
                 {% if from_thing_names %}
@@ -46,62 +46,73 @@
                 {% endfor %}
             </div>
 
-            <label for="thingImage"> Image </label>
-            <input id="thingImage" name="thingImage" type="file" accept="image/*">
-            <img class="imagePreview" alt="Image preview will appear here"
-                src="{{ thing.img_path }}">
+            <div id="imageArea" class="relatedFormItems">
+                <label for="thingImage"> Image </label>
+                <input id="thingImage" name="thingImage" type="file" accept="image/*">
+                <img class="imagePreview" alt="Image preview will appear here"
+                    src="{{ thing.img_path }}">
+            </div>
         </section>
 
         <section id="category" class="search-el">
             <h3> Category </h3>
-            <label for="categoryName"> Name </label>
-            <select name="categoryNamePrefix" id="categoryNamePrefix">
-                <option value="FAVORITE">
-                    FAVORITE
-                </option>
-                <option value="LEAST FAVORITE">
-                    LEAST FAVORITE
-                </option>
-                <option value="MOST">
-                    MOST
-                </option>
-                <option value="LEAST">
-                    LEAST
-                </option>
-                <option value="">
-                </option>
-            </select>
-            <div class="search-input-wrapper">
-                <input
-                    class="category vote-input"
-                    id="categoryName"
-                    type="text"
-                    name="categoryName"
-                    placeholder="identity reveal"
-                    autocomplete="off"
-                    value="{{ category.name }}"
-                >
-                <div class="search-suggestions" role="listbox"></div>
+            <div class="relatedFormItems">
+                <label for="categoryName"> Name </label>
+                <select name="categoryNamePrefix" id="categoryNamePrefix">
+                    <option value="FAVORITE">
+                        FAVORITE
+                    </option>
+                    <option value="LEAST FAVORITE">
+                        LEAST FAVORITE
+                    </option>
+                    <option value="MOST">
+                        MOST
+                    </option>
+                    <option value="LEAST">
+                        LEAST
+                    </option>
+                    <option value="">
+                    </option>
+                </select>
+                <div class="search-input-wrapper">
+                    <input
+                        class="category vote-input"
+                        id="categoryName"
+                        type="text"
+                        name="categoryName"
+                        placeholder="identity reveal"
+                        autocomplete="off"
+                        value="{{ category.name }}"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
             </div>
 
-            <label for="categoryIsNegative"> Negative? </label>
-            <input id="categoryIsNegative" name="categoryIsNegative" type="checkbox" {{ 'checked' if category.is_negative else '' }}>
-
-            <label for="categoryDesc"> Description </label>
-            <input id="categoryDesc" name="categoryDesc" type="text" placeholder="When you don't know who someone is, but then you do."
-                value="{{ category.desc }}">
+            <div class="relatedFormItems">
+                <label for="categoryIsNegative"> Negative? </label>
+                <input id="categoryIsNegative" name="categoryIsNegative" type="checkbox" {{ 'checked' if category.is_negative else '' }}>
+            </div>
+            <div class="relatedFormItems">
+                <label for="categoryDesc"> Description </label>
+                <input id="categoryDesc" name="categoryDesc" type="text" placeholder="When you don't know who someone is, but then you do."
+                    value="{{ category.desc }}">
+            </div>
         </section>
 
         <section id="vote">
             <h3> Vote </h3>
-            <label for="voteSpoilerFor"> This vote is a spoiler for (if applicable): </label>
-            <input id="voteSpoilerFor" name="voteSpoilerFor" type="text" placeholder="Star Wars Episode IV: The Empire Strikes Back">
-            
-            <label for="voteComment"> Comment on vote: </label>
-            <input id="voteComment" name="voteComment" type="text" placeholder="It was so cool.">
+            <div class="relatedFormItems">
+                <label for="voteSpoilerFor"> This vote is a spoiler for (if applicable): </label>
+                <input id="voteSpoilerFor" name="voteSpoilerFor" type="text" placeholder="Star Wars Episode IV: The Empire Strikes Back">
+            </div>
+            <div class="relatedFormItems">
+                <label for="voteComment"> Comment on vote: </label>
+                <input id="voteComment" name="voteComment" type="text" placeholder="It was so cool.">
 
-            <label for="voteIsFavorite"> Favorite opinion of yours? </label>
-            <input id="voteIsFavorite" name="voteIsFavorite" type="checkbox">
+            <div class="relatedFormItems">
+                <label for="voteIsFavorite"> Favorite opinion of yours? </label>
+                <input id="voteIsFavorite" name="voteIsFavorite" type="checkbox">
+            </div>
         </section>
         
         <button type="submit"> Add </button>

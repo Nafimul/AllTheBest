@@ -31,7 +31,28 @@ img {
 }
 
 #addForm {
-    margin-top: 100px;
+    margin: 100px auto 0;
+    max-width: 960px;
+}
+
+#addForm .search-el {
+    gap: 0.9rem;
+}
+
+#addForm .search-el > .relatedFormItems {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+    width: 100%;
+    padding: 0.85rem 0.95rem;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+#addForm .search-el > .relatedFormItems > * {
+    margin-bottom: 0;
 }
 
 body {
@@ -538,6 +559,17 @@ th {
 @media (max-width: 760px) {
     .page-content {
         padding: 0 0.8rem;
+    }
+
+    #addForm {
+        margin-top: 70px;
+    }
+
+    #addForm .search-el > .relatedFormItems {
+        padding: 0.75rem 0;
+        border: 0;
+        border-radius: 0;
+        background: transparent;
     }
 
     .hero-card {
