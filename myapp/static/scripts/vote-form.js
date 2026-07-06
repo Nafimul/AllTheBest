@@ -1,22 +1,6 @@
 "use strict";
 import { sendFormToApi } from "./api.js";
-
-export function addFromThingInput(inputEl) {
-    const clone = inputEl.cloneNode(true);
-    clone.value = "";
-    clone.id = null;
-    inputEl.parentElement.appendChild(clone);
-    return clone;
-}
-
-export function removeEmptyFromThingNames(formData, fieldName = "fromThingNames") {
-    let fromThingNames = formData.getAll(fieldName);
-    fromThingNames = fromThingNames.filter((name) => String(name).trim() !== "");
-    formData.delete(fieldName);
-    fromThingNames.forEach((name) => {
-        formData.append(fieldName, name);
-    });
-}
+import { addFromThingInput, removeEmptyFromThingNames, submitVoteForm } from "./form-helpers.js";
 
 document.addEventListener("DOMContentLoaded", function() {
     const form = document.forms.namedItem("addForm");
@@ -24,18 +8,19 @@ document.addEventListener("DOMContentLoaded", function() {
         return;
     }
 
-    const formMessage = document.getElementById("formMessage");
     const thingImage = document.getElementById("thingImage");
-    const imagePreview = document.getElementById("imagePreview");
+    const imagePreview = document.getElementsByClassName("imagePreview")[0];
     const categoryIsNegativeEl = document.getElementById("categoryIsNegative");
     const categoryNamePrefixEl = document.getElementById("categoryNamePrefix");
     const categoryNameEl = document.getElementById("categoryName");
     const fromThingInput = document.getElementsByClassName("fromThingNames")[0];
     const addFromThingButton = document.getElementById("fromThingButton");
+    const formMessage = document.getElementById("formMessage");
+
 
     categoryNamePrefixEl.addEventListener("change", changeIsNegative);
     thingImage.addEventListener("change", previewImage);
-    form.addEventListener("submit", submit);
+    form.addEventListener("submit", e => formMessage.innerText = submitVoteForm(e));
     categoryNameEl.addEventListener("change", removeExtraPrefix);
     addFromThingButton.addEventListener("click", e => addFromThingInput(addFromThingButton.parentElement.lastElementChild));
 
@@ -70,65 +55,4 @@ document.addEventListener("DOMContentLoaded", function() {
             imagePreview.src = "";
         }
     }
-
-    async function submit(e) {
-        e.preventDefault();
-        const formData = new FormData(form);
-
-        const categoryNameWithoutPrefix = formData.get("categoryName");
-        const categoryNamePrefix = formData.get("categoryNamePrefix");
-        const thingName = formData.get("thingName");
-        const categoryName = categoryNamePrefix + " " + categoryNameWithoutPrefix;
-        formData.set("categoryName", categoryName);
-        formData.set("categoryNamePrefix", categoryNamePrefix);
-        formData.set("thingName", thingName);
-        removeEmptyFromThingNames(formData);
-
-        formMessage.innerText = "";
-
-        let isSuccess = true;
-        let isAddingCategory = false;
-        let isAddingThing = false;
-        let isAddingVote = false;
-        
-        if (categoryNameWithoutPrefix !== "")
-            isAddingCategory = true;
-        if (thingName !== "")
-            isAddingThing = true;
-        if (isAddingCategory && isAddingThing)
-            isAddingVote = true;
-        if (!isAddingCategory && !isAddingThing) {
-            formMessage.innerText = "Please fill in either a category name or a thing name.";
-            return;
-        }
-
-        if (isAddingThing) {
-            const result = await sendFormToApi(formData, "/api/thing", "POST");
-            if (!result)
-                isSuccess = false;
-        }
-        if (isAddingCategory) {
-            const result = await sendFormToApi(formData, "/api/category", "POST");
-            if (!result)
-                isSuccess = false;
-        }
-        if (isAddingVote) {
-            const result = await sendFormToApi(formData, "/api/vote", "POST");
-            if (!result)
-                isSuccess = false;
-        }
-        
-        if (isSuccess)
-            if (isAddingVote)
-                formMessage.innerText = "successfully added vote for " + thingName + " in " + categoryName;
-            else {
-                if (isAddingThing)
-                    formMessage.innerText = "successfully added " + thingName;
-                if (isAddingCategory)
-                    formMessage.innerText = "successfully added " + categoryName;
-            }
-        else
-            formMessage.innerText = "Error!";
-    }
-
 });

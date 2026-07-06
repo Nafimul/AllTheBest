@@ -14,30 +14,41 @@
         <button id="duplicateFormButton" type="button">Duplicate form</button>
     </div>
 
-    <div id="formsContainer"></div>
-
-    <template id="thingFormTemplate">
-        <form class="thing-form" enctype="multipart/form-data">
+    <div id="formsContainer">
+        <form class="thing-form search-el" id="addForm">
             <div class="form-card">
                 <h3>Thing</h3>
 
-                <label>Name</label>
-                <input name="thingName" type="text" placeholder="Darth Vader">
-
-                <label>From</label>
-                <div class="from-things">
-                    <button type="button" class="add-from-thing-button">Add From Thing</button>
-                    <input name="fromThingNames" type="text" placeholder="Star Wars">
+                <label for="thingName">Name</label>
+                <div class="search-input-wrapper">
+                    <input
+                        id="thingName"
+                        class="thing vote-input"
+                        type="text"
+                        name="thingName"
+                        placeholder="Darth Vader"
+                        autocomplete="off"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
                 </div>
 
-                <label>Image</label>
-                <input name="thingImage" type="file" accept="image/*">
+                <label>
+                    From
+                    <div class="from-things">
+                        <button type="button" class="add-from-thing-button">Add From Thing</button>
+                        <input name="fromThingNames" type="text" placeholder="Star Wars">
+                    </div>
+                </label>
+
+                <label>
+                    Image
+                    <input name="thingImage" type="file" accept="image/*">
+                </label>
                 <img class="imagePreview" alt="Image preview will appear here">
 
                 <p class="formMessage"></p>
-                <button type="submit">Add Thing</button>
+                <button>Add Thing</button>
             </div>
         </form>
-    </template>
-    
+    </div>
 {% endblock %}

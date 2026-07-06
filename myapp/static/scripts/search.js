@@ -6,8 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchEls = document.querySelectorAll('.search-el');
     const globalsearchForm = document.getElementById("globalSearchForm");
 
-    
-
     async function autofillCategoryForm(categoryName) {
         const addForm = document.getElementById("addForm");
         const categoryJson = await getCategoryJson(categoryName);
@@ -23,7 +21,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const searchTypeInputs = searchEl.querySelectorAll('input[name="search-type"]');
 
         async function autofillThingForm(thingName) {
-            const imagePreview = searchEl.querySelector("#imagePreview");
+            const imagePreview = searchEl.querySelector(".imagePreview");
             const thingJson = await getThingJson(thingName);
             if (!thingJson)
                 return;
