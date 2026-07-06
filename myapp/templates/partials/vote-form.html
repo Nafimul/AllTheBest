@@ -40,20 +40,23 @@
                 <button type="button" id="fromThingButton"> Add From Thing </button>
                 <label for="fromThingNames"> From </label>
                 {% if from_thing_names %}
-                    {% for i in range(from_thing_names | length) %}
-                        <div class="search-input-wrapper">
-                            <input
-                                class="thing vote-input"
-                                type="text"
-                                name="fromThingNames"
-                                placeholder="Star Wars"
-                                autocomplete="off"
-                                value="{{ from_thing_names[i] }}"
-                            >
-                            <div class="search-suggestions" role="listbox"></div>
-                        </div>
-                    {% endfor %}
+                    {% set num_from_thing_inputs = from_thing_names | length %}
+                {% else %}
+                    {% set num_from_thing_inputs = 1 %}
                 {% endif %}
+                {% for i in range(num_from_thing_inputs) %}
+                    <div class="search-input-wrapper">
+                        <input
+                            class="thing vote-input"
+                            type="text"
+                            name="fromThingNames"
+                            placeholder="Star Wars"
+                            autocomplete="off"
+                            value="{{ from_thing_names[i] }}"
+                        >
+                        <div class="search-suggestions" role="listbox"></div>
+                    </div>
+                {% endfor %}
             </div>
 
             <label for="thingImage"> Image </label>

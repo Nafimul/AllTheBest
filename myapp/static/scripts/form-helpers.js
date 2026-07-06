@@ -1,11 +1,11 @@
 import { sendFormToApi } from "./api.js";
 
 
-export function addFromThingInput(inputEl) {
-    const clone = inputEl.cloneNode(true);
+export function addFromThingInput(searchInputWrapper) {
+    const clone = searchInputWrapper.cloneNode(true);
     clone.value = "";
     clone.id = null;
-    inputEl.parentElement.appendChild(clone);
+    searchInputWrapper.parentElement.appendChild(clone);
     return clone;
 }
 
