@@ -262,10 +262,13 @@ def create_app(env: str = "development") -> Flask:
         current_user_votes = get_current_user_votes()
 
         first_thing_img_path = None
+        hide_lead_image = False
         if len(rows) > 0:
+            first_ranked_score = rows[0]
             first_thing_img_path = thing_manager.get_thing(
-                rows[0]["thing_name"]
+                first_ranked_score["thing_name"]
             ).img_path
+            hide_lead_image = bool(first_ranked_score["spoiler_for"])
 
         return render_template(
             "category.html",
@@ -273,6 +276,7 @@ def create_app(env: str = "development") -> Flask:
             scores=rows,
             current_user_votes=current_user_votes,
             first_thing_img_path=first_thing_img_path,
+            hide_lead_image=hide_lead_image,
         )
 
     @app.route("/things/<string:name>", methods=["GET"])

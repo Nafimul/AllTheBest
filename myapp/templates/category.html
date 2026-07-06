@@ -11,13 +11,11 @@
             {% if category.desc %}
                 <p class="category-desc">{{ category.desc }}</p>
             {% endif %}
-            <a href="{{ url_for('show_thing', name=thing_name) }}">
-            {% if first_thing_img_path %}
+            {% if first_thing_img_path and not hide_lead_image %}
                 <img class="profile-thing-image" src="{{ first_thing_img_path }}" alt="image of number 1 ranked thing">
             {% else %}
                 <div class="profile-thing-image placeholder">No image</div>
             {% endif %}
-        </a>
         </section>
 
         <section class="category-scores">
