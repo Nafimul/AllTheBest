@@ -34,9 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
         let currentSuggestions = [];
 
         const autofillForms = (searchTerm) => {
-                console.log("out");
             if (searchInput.classList.contains("vote-input")) {
-                console.log("oidfnanfio");
                 if (searchInput.classList.contains("thing")) {
                     autofillThingForm(searchTerm);
                 } else if (searchInput.classList.contains("category")) {

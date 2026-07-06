@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% from 'partials/vote-form.html' import render_vote_form %}
 {% block title %}Category{% endblock %}
 {% block file_links %}
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
@@ -68,6 +69,8 @@
                 <p>No votes yet for this category.</p>
             {% endif %}
         </section>
+
+        {{ render_vote_form(category) }}
     {% else %}
         <p>Category not found.</p>
     {% endif %}

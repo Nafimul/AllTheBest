@@ -41,13 +41,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function removeExtraPrefix(e) {
         let categoryName = e.currentTarget.value;
-        const BUILTINPREFIXES = ["LEAST FAVORITE", "FAVORITE", "LEAST", "MOST"];
+        const BUILTINPREFIXES = ["LEAST FAVORITE ", "FAVORITE ", "LEAST ", "MOST "];
         BUILTINPREFIXES.forEach( prefix => {
-            console.log(prefix);
             if (categoryName.includes(prefix)) {
                 categoryNamePrefixEl.value = prefix;
                 e.currentTarget.value = categoryName.replace(prefix, "");
-                console.log(categoryName.replace(prefix, ""));
             };
         });
     }
@@ -76,6 +74,7 @@ document.addEventListener("DOMContentLoaded", function() {
     async function submit(e) {
         e.preventDefault();
         const formData = new FormData(form);
+        console.log(document.getElementById("categoryDesc").value);
 
         const categoryNameWithoutPrefix = formData.get("categoryName");
         const categoryNamePrefix = formData.get("categoryNamePrefix");

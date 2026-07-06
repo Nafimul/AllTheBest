@@ -1,0 +1,113 @@
+{% macro render_vote_form(category) %}
+    {% if category %}
+        {% if category.name.startswith('LEAST FAVORITE') %}
+            {% set category_name_without_prefix = category.name | replace('LEAST FAVORITE ', '') %}
+            {% set category_prefix = 'LEAST FAVORITE' %}
+        {% elif category.name.startswith('FAVORITE') %}
+            {% set category_name_without_prefix = category.name | replace('FAVORITE ', '') %}
+            {% set category_prefix = 'FAVORITE' %}
+        {% elif category.name.startswith('MOST') %}
+            {% set category_name_without_prefix = category.name | replace('MOST ', '') %}
+            {% set category_prefix = 'MOST' %}
+        {% elif category.name.startswith('LEAST') %}
+            {% set category_name_without_prefix = category.name | replace('LEAST ', '') %}
+            {% set category_prefix = 'LEAST' %}
+        {% endif %}
+    {% endif %}
+    <script type='module' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
+
+    <form method="POST" id="addForm">
+        <h2> Add a thing or category </h2>
+        <h2> Add both at once to submit a vote </h2>
+
+        <section id="thing">
+            <h3> Thing </h3>
+            <label for="thingName"> Name </label>
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input
+                        id="thingName"
+                        class="thing vote-input"
+                        type="text"
+                        name="thingName"
+                        placeholder="Darth Vader"
+                        autocomplete="off"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+            </div>
+
+            <div id="fromThings">
+                <button type="button" id="fromThingButton"> Add From Thing </button>
+                <label for="fromThingNames:"> From </label>
+                <input id="fromThingNames" name="fromThingNames" type="text" placeholder="Star Wars">
+                <input name="fromThingNames" type="text" placeholder="David Prowse (Actor)">
+            </div>
+
+            <label for="thingImage"> Image </label>
+            <input id="thingImage" name="thingImage" type="file" accept="image/*">
+            <img id="imagePreview" alt="Image preview will appear here">
+        </section>
+
+        <section id="category">
+            <h3> Category </h3>
+            <label for="categoryName"> Name </label>
+            <select name="categoryNamePrefix" id="categoryNamePrefix">
+                <option value="FAVORITE"
+                    {% if category_prefix == "FAVORITE" %}selected{% endif %}>
+                    FAVORITE
+                </option>
+                <option value="LEAST FAVORITE"
+                    {% if category_prefix == "LEAST FAVORITE" %}selected{% endif %}>
+                    LEAST FAVORITE
+                </option>
+                <option value="MOST"
+                    {% if category_prefix == "MOST" %}selected{% endif %}>
+                    MOST
+                </option>
+                <option value="LEAST"
+                    {% if category_prefix == "LEAST" %}selected{% endif %}>
+                    LEAST
+                </option>
+                <option value="">
+                </option>
+            </select>
+            <div class="search-bar">
+                <div class="search-input-wrapper">
+                    <input
+                        class="category vote-input"
+                        id="categoryName"
+                        type="text"
+                        name="categoryName"
+                        placeholder="identity reveal"
+                        autocomplete="off"
+                        value="{{ category_name_without_prefix }}"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+            </div>
+
+            <label for="categoryIsNegative"> Negative? </label>
+            <input id="categoryIsNegative" name="categoryIsNegative" type="checkbox" {{ 'checked' if category.is_negative else '' }}>
+
+            <label for="categoryDesc"> Description </label>
+            <input id="categoryDesc" name="categoryDesc" type="text" placeholder="When you don't know who someone is, but then you do."
+                value="{{ category.desc }}">
+        </section>
+
+        <section id="vote">
+            <h3> Vote </h3>
+            <label for="voteSpoilerFor"> This vote is a spoiler for (if applicable): </label>
+            <input id="voteSpoilerFor" name="voteSpoilerFor" type="text" placeholder="Star Wars Episode IV: The Empire Strikes Back">
+            
+            <label for="voteComment"> Comment on vote: </label>
+            <input id="voteComment" name="voteComment" type="text" placeholder="It was so cool.">
+
+            <label for="voteIsFavorite"> Favorite opinion of yours? </label>
+            <input id="voteIsFavorite" name="voteIsFavorite" type="checkbox">
+        </section>
+        
+        <button type="submit"> Add </button>
+    </form>
+    <p id="formMessage"></p>
+{% endmacro %}
