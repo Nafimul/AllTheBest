@@ -3,8 +3,6 @@
 {% block content %}
 <div class="vote-details">
   {% if vote %}
-    <h1>Vote Details</h1>
-    
     <div class="vote-card">
       {% if thing and thing.img_path %}
         <img class="vote-detail-image" src="{{ thing.img_path }}" alt="{{ vote.thing_name }}">

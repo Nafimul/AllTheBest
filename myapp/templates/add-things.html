@@ -4,10 +4,6 @@
     <script type='module' src='{{ url_for("static", filename="scripts/add-things.js") }}'></script>
 {% endblock %}
 {% block content %}
-    <section class="page-header">
-        <h2>Add Things</h2>
-    </section>
-
     <div class="form-actions">
         <label for="bulkImageUpload">Upload multiple images to create forms</label>
         <input id="bulkImageUpload" type="file" multiple accept="image/*">
