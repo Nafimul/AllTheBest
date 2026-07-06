@@ -20,7 +20,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     categoryNamePrefixEl.addEventListener("change", changeIsNegative);
     thingImage.addEventListener("change", previewImage);
-    form.addEventListener("submit", e => formMessage.innerText = submitVoteForm(e));
+    form.addEventListener("submit", e => submitVoteForm(e));
     categoryNameEl.addEventListener("change", removeExtraPrefix);
     console.log(document.getElementById("fromThings"));
     addFromThingButton.addEventListener("click", e => addFromThingInput(document.getElementById("fromThings").querySelector(".search-input-wrapper")));
