@@ -87,7 +87,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 
         formsContainer.appendChild(form);
-        console.log(form);
         return form;
     }
 

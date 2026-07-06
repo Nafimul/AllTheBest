@@ -22,7 +22,6 @@ document.addEventListener("DOMContentLoaded", function() {
     thingImage.addEventListener("change", previewImage);
     form.addEventListener("submit", e => submitVoteForm(e));
     categoryNameEl.addEventListener("change", removeExtraPrefix);
-    console.log(document.getElementById("fromThings"));
     addFromThingButton.addEventListener("click", e => addFromThingInput(document.getElementById("fromThings").querySelector(".search-input-wrapper")));
 
     function removeExtraPrefix(e) {

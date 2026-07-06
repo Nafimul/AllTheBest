@@ -25,6 +25,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const thingJson = await getThingJson(thingName);
             if (!thingJson)
                 return;
+if (thingJson["img_path"])
             imagePreview.src = thingJson["img_path"];
         }
 
