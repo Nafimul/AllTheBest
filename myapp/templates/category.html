@@ -1,0 +1,75 @@
+{% extends 'base.html' %}
+{% from 'partials/vote-form.html' import render_vote_form %}
+{% block title %}{{ category.name }}{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
+{% block content %}
+    {% if category %}
+        <section class="category-detail">
+            <h2>{{ category.name }}</h2>
+            {% if category.desc %}
+                <p class="category-desc">{{ category.desc }}</p>
+            {% endif %}
+            {% if first_thing_img_path and not hide_lead_image %}
+                <img class="profile-thing-image" src="{{ first_thing_img_path }}" alt="image of number 1 ranked thing">
+            {% else %}
+                <div class="profile-thing-image placeholder">No image</div>
+            {% endif %}
+        </section>
+
+        <section class="category-scores">
+            <h3>Leaderboard</h3>
+            {% if scores %}
+                <table class="leaderboard">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Thing</th>
+                            <th>Votes</th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in scores %}
+                            <tr>
+                                <td>{{ row.rank_text }}</td>
+                                <td>
+                                    {% if row.spoiler_for %}
+                                        <button
+                                            type="button"
+                                            class="spoiler-toggle"
+                                            data-spoiler-for="{{ row.spoiler_for }}"
+                                            data-spoiler-word="{{ row.thing_name }}"
+                                            data-link-target="{{ url_for('show_thing', name=row.thing_name) }}"
+                                        >
+                                            CLICK TO SEE SPOILER FOR {{ row.spoiler_for }}
+                                        </button>
+                                    {% else %}
+                                        <a href="{{ url_for('show_thing', name=row.thing_name) }}">{{ row.thing_name }}</a>
+                                    {% endif %}
+                                </td>
+                                <td class="vote-count">{{ row.num_votes }}</td>
+                                <td>
+                                    <button class="upvote_button" data-category="{{ category.name }}" data-thing="{{ row.thing_name }}">
+                                        <img
+                                            src='{{ url_for("static", filename="assets/images/"
+                                                + ("up_arrow_green.png" if category.name in current_user_votes and current_user_votes[category.name] == row.thing_name else "up_arrow_white.png")
+                                                ) }}'
+                                            width="10" height="10" class="upvote_img">
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% else %}
+                <p>No votes yet for this category.</p>
+            {% endif %}
+        </section>
+
+        {{ render_vote_form(category, None, None) }}
+    {% else %}
+        <p>Category not found.</p>
+    {% endif %}
+{% endblock %}

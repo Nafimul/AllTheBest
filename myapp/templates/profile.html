@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% from 'partials/profile_thing_card.html' import render_profile_thing_card %}
+{% block title %} {{ profile.name }}'s Profile {% endblock %}
+{% block file_links %}
+  <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
+{% block content %}
+  <section class="page-header centered">
+    <h2>{{ profile.name }}'s profile</h2>
+  </section>
+{% if things_with_votes %}
+  <ul class="profile-things">
+    {% for key, value in things_with_votes.items() %}
+      {{ render_profile_thing_card(profile.user_id, key, value, current_user_votes) }}
+    {% endfor %}
+  </ul>
+{% else %}
+  <p>No votes yet.</p>
+{% endif %}
+{% endblock %}

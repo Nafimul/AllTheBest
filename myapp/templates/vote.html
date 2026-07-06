@@ -1,0 +1,167 @@
+{% extends 'base.html' %}
+{% block title %}Vote Details{% endblock %}
+{% block content %}
+<div class="vote-details">
+  {% if vote %}
+    <div class="vote-card">
+      {% if thing and thing.img_path %}
+        <img class="vote-detail-image" src="{{ thing.img_path }}" alt="{{ vote.thing_name }}">
+      {% else %}
+        <div class="vote-detail-image placeholder">No image</div>
+      {% endif %}
+
+      <div class="vote-info">
+        <div class="vote-section">
+          <h2>Voter Information</h2>
+          <p>
+            <strong>User:</strong> 
+            <a href="{{ url_for('profile_by_id', id=voter_user_id) if voter_user_id else '#' }}">
+              {{ voter_name }}
+            </a>
+          </p>
+        </div>
+
+        <div class="vote-section">
+          <h2>Vote Details</h2>
+            <p>
+              <strong>Thing:</strong> 
+              <a href="{{ url_for('show_thing', name=vote.thing_name) }}">
+                {{ vote.thing_name }}
+              </a>
+            </p>
+
+          <p>
+            <strong>Category:</strong> 
+            <a href="{{ url_for('show_category', name=vote.category_name) }}">
+              {{ vote.category_name }}
+            </a>
+          </p>
+
+          {% if vote.comment %}
+            <p>
+              <strong>Comment:</strong> {{ vote.comment }}
+            </p>
+          {% else %}
+            <p>
+              <strong>Comment:</strong> <em>No comment</em>
+            </p>
+          {% endif %}
+
+          <p>
+            <strong>Favorite Vote:</strong> 
+            {% if vote.is_favorite %}
+              <span class="favorite-badge">✓ Yes</span>
+            {% else %}
+              <span>No</span>
+            {% endif %}
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="vote-actions">
+      <a href="{{ url_for('profile') }}" class="btn">Back to Profile</a>
+    </div>
+  {% else %}
+    <p>Vote not found.</p>
+    <a href="{{ url_for('profile') }}" class="btn">Back to Profile</a>
+  {% endif %}
+</div>
+
+<style>
+  .vote-details {
+    padding: 20px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .vote-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    gap: 20px;
+  }
+
+  .vote-detail-image {
+    width: 200px;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 8px;
+    flex-shrink: 0;
+  }
+
+  .vote-detail-image.placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    color: #999;
+  }
+
+  .vote-info {
+    flex: 1;
+  }
+
+  .vote-section {
+    margin-bottom: 20px;
+  }
+
+  .vote-section h2 {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+    color: #333;
+  }
+
+  .vote-section p {
+    margin: 8px 0;
+    line-height: 1.6;
+  }
+
+  .vote-section a {
+    color: #0066cc;
+    text-decoration: none;
+  }
+
+  .vote-section a:hover {
+    text-decoration: underline;
+  }
+
+  .favorite-badge {
+    background-color: #ffd700;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: bold;
+  }
+
+  .vote-actions {
+    margin-top: 20px;
+  }
+
+  .btn {
+    display: inline-block;
+    background-color: #0066cc;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+    transition: background-color 0.2s;
+  }
+
+  .btn:hover {
+    background-color: #0052a3;
+  }
+
+  @media (max-width: 600px) {
+    .vote-card {
+      flex-direction: column;
+    }
+
+    .vote-detail-image {
+      width: 100%;
+      height: auto;
+    }
+  }
+</style>
+{% endblock %}

@@ -1,0 +1,121 @@
+{% macro render_vote_form(category, thing, from_thing_names) %}
+    <script type='module' src='{{ url_for("static", filename="scripts/vote-form.js") }}'></script>
+
+    <form method="POST" id="addForm">
+        <h2> Vote Form: </h2>
+        <p> Add a thing or category. Add both at once to submit a vote </p>
+
+        <section id="thing" class="search-el">
+            <h3> Thing </h3>
+            <div class="search-input-wrapper relatedFormItems">
+                <label for="thingName"> Name </label>
+                <input
+                    id="thingName"
+                    class="thing vote-input"
+                    type="text"
+                    name="thingName"
+                    placeholder="Darth Vader"
+                    autocomplete="off"
+                    value="{{thing.name}}"
+                >
+                <div class="search-suggestions" role="listbox"></div>
+            </div>
+
+            <div id="fromThings" class="relatedFormItems">
+                <button type="button" id="fromThingButton"> Add From Thing </button>
+                <label for="fromThingNames"> From </label>
+                {% if from_thing_names %}
+                    {% set num_from_thing_inputs = from_thing_names | length %}
+                {% else %}
+                    {% set num_from_thing_inputs = 1 %}
+                {% endif %}
+                {% for i in range(num_from_thing_inputs) %}
+                    <div class="search-el">
+                        <div class="search-input-wrapper">
+                            <input
+                                class="thing vote-input fromThing"
+                                type="text"
+                                name="fromThingNames"
+                                placeholder="Star Wars"
+                                autocomplete="off"
+                                value="{{ from_thing_names[i] }}"
+                            >
+                            <div class="search-suggestions" role="listbox"></div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <div id="imageArea" class="relatedFormItems">
+                <label for="thingImage"> Image </label>
+                <input id="thingImage" name="thingImage" type="file" accept="image/*">
+                <img class="imagePreview" alt="Image preview will appear here"
+                    src="{{ thing.img_path }}">
+            </div>
+        </section>
+
+        <section id="category" class="search-el">
+            <h3> Category </h3>
+            <div class="relatedFormItems">
+                <label for="categoryName"> Name </label>
+                <select name="categoryNamePrefix" id="categoryNamePrefix">
+                    <option value="FAVORITE">
+                        FAVORITE
+                    </option>
+                    <option value="LEAST FAVORITE">
+                        LEAST FAVORITE
+                    </option>
+                    <option value="MOST">
+                        MOST
+                    </option>
+                    <option value="LEAST">
+                        LEAST
+                    </option>
+                    <option value="">
+                    </option>
+                </select>
+                <div class="search-input-wrapper">
+                    <input
+                        class="category vote-input"
+                        id="categoryName"
+                        type="text"
+                        name="categoryName"
+                        placeholder="identity reveal"
+                        autocomplete="off"
+                        value="{{ category.name }}"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+            </div>
+
+            <div class="relatedFormItems">
+                <label for="categoryIsNegative"> Negative? </label>
+                <input id="categoryIsNegative" name="categoryIsNegative" type="checkbox" {{ 'checked' if category.is_negative else '' }}>
+            </div>
+            <div class="relatedFormItems">
+                <label for="categoryDesc"> Description </label>
+                <input id="categoryDesc" name="categoryDesc" type="text" placeholder="When you don't know who someone is, but then you do."
+                    value="{{ category.desc }}">
+            </div>
+        </section>
+
+        <section id="vote">
+            <h3> Vote </h3>
+            <div class="relatedFormItems">
+                <label for="voteSpoilerFor"> This vote is a spoiler for (if applicable): </label>
+                <input id="voteSpoilerFor" name="voteSpoilerFor" type="text" placeholder="Star Wars Episode IV: The Empire Strikes Back">
+            </div>
+            <div class="relatedFormItems">
+                <label for="voteComment"> Comment on vote: </label>
+                <input id="voteComment" name="voteComment" type="text" placeholder="It was so cool.">
+
+            <div class="relatedFormItems">
+                <label for="voteIsFavorite"> Favorite opinion of yours? </label>
+                <input id="voteIsFavorite" name="voteIsFavorite" type="checkbox">
+            </div>
+        </section>
+        
+        <button type="submit"> Add </button>
+        <p class="formMessage"></p>
+    </form>
+{% endmacro %}

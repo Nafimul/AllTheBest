@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block title %}Add Things{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/add-things.js") }}'></script>
+{% endblock %}
+{% block content %}
+    <div class="form-actions">
+        <label for="bulkImageUpload">Upload multiple images to create forms</label>
+        <input id="bulkImageUpload" type="file" multiple accept="image/*">
+        <button id="duplicateFormButton" type="button">Duplicate form</button>
+    </div>
+
+    <div id="formsContainer">
+        <form class="thing-form search-el" id="addForm">
+            <div class="form-card">
+                <h3>Thing</h3>
+
+                <div class="search-input-wrapper" class="relatedFormItems">
+                    <label for="thingName">Name</label>
+                    <input
+                        id="thingName"
+                        class="thing vote-input"
+                        type="text"
+                        name="thingName"
+                        placeholder="Darth Vader"
+                        autocomplete="off"
+                    >
+                    <div class="search-suggestions" role="listbox"></div>
+                </div>
+
+                <div class="relatedFormItems">
+                    <label>
+                        From
+                        <div class="from-things">
+                            <button type="button" class="add-from-thing-button">Add From Thing</button>
+                            <input name="fromThingNames" type="text" placeholder="Star Wars">
+                        </div>
+                    </label>
+                </div>
+                
+                <div class="relatedFormItems">
+                    <label>
+                        Image
+                        <input name="thingImage" type="file" accept="image/*">
+                    </label>
+                    <img class="imagePreview" alt="Image preview will appear here">
+                </div>
+
+                <p class="formMessage"></p>
+                <button>Add Thing</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

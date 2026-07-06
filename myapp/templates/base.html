@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+        <script type='text/javascript' src='{{ url_for("static", filename="scripts/app.js") }}'></script>
+        <script type="module" src='{{ url_for("static", filename="scripts/search.js") }}'></script>
+        <link rel="stylesheet" type='text/css' href='{{ url_for("static", filename="styles/styles.css") }}'/>
+        <link rel="icon" type="image/x-icon" href='{{ url_for("static", filename="assets/images/up_arrow_green.ico") }}'>
+        {% block file_links %}{% endblock %}
+    </head>
+    <body>
+        <h1> {% block title %}{% endblock %} </h1>
+
+        {% for message in get_flashed_messages() %}
+            <div id="flash">
+                {{ message }}
+            </div>
+        {% endfor %}
+                
+
+        <ul class='navbar'>
+            <li><a href='/'>Home</a></li>
+            <li><a href='/categories'>Categories</a></li>
+            <li><a href='/things'>Things</a></li>
+            <li><a href='/users'>Users</a></li>
+            <li><a href='/profile'>Profile</a></li>
+            <li><a href='/add-things'>Add Thing</a></li>
+            <li><a href='/vote-form'>Vote</a></li>
+            <li><a href='/login'>Login</a></li>
+            <li><a href='/signup'>Signup</a></li>
+        </ul>
+
+        <form class="search-el" action="/things" method="get" id="globalSearchForm">
+            <label class="search-radio">
+                <input type="radio" name="search-type" value="thing" checked>
+                Thing
+            </label>
+
+            <label class="search-radio">
+                <input type="radio" name="search-type" value="category">
+                Category
+            </label>
+
+            <div class="search-input-wrapper">
+                <input
+                    type="text"
+                    name="q"
+                    placeholder="Search..."
+                    autocomplete="off"
+                >
+
+                <div class="search-suggestions" role="listbox"></div>
+            </div>
+
+            <button type="submit">Search</button>
+        </form>
+
+        <main class="page-content">
+            {% block content %}{% endblock %}
+        </main>
+    </body>
+</html>

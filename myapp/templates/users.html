@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}Users{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
+{% block content %}
+    {% if profiles %}
+        {% for profile in profiles %}
+            <p>
+                <a href="{{ url_for('profile_by_id', id=profile.user_id) }}"> {{ profile.name }} </a>
+            </p>
+        {% endfor %}
+    {% else %}
+        <p>No users found.</p>
+    {% endif %}
+{% endblock %}

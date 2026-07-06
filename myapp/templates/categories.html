@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}Categories{% endblock %}
+{% block file_links %}
+    <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
+{% endblock %}
+{% block content %}
+    {% if search_results %}
+        {% if search_query %}
+            <p>Showing results for "{{ search_query }}".</p>
+        {% endif %}
+        <ul class="things-list">
+            {% for category in search_results %}
+            <li>
+                <a href="{{ url_for('show_category', name=category.name) }}">{{ category.name }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% elif categories_with_scores %}
+        {% for key, value in categories_with_scores.items() %}
+            <article class="{{ 'negative' if key.is_negative else '' }}" id="{{ key.name }}">
+                <h2><a href="{{ url_for('show_category', name=key.name) }}">{{ key.name }}</a></h2>
+                <ol type="1">
+                    {% for score in value %}
+                    <li id="{{ score.thing_name }}">
+                        <p>
+                            {% if score.spoiler_for %}
+                                <button
+                                    type="button"
+                                    class="spoiler-toggle"
+                                    data-spoiler-for="{{ score.spoiler_for }}"
+                                    data-spoiler-word="{{ score.thing_name }}"
+                                    data-link-target="{{ url_for('show_thing', name=score.thing_name) }}"
+                                >
+                                    CLICK TO SEE SPOILER FOR {{ score.spoiler_for }}
+                                </button>
+                            {% else %}
+                                <a href="{{ url_for('show_thing', name=score.thing_name) }}">{{ score.thing_name }}</a>
+                            {% endif %}
+                        </p>
+                        <p class="vote-count">{{ score.num_votes }}</p>
+                        <button class="upvote_button" data-category="{{ key.name }}" data-thing="{{ score.thing_name }}">
+                            <img
+                            src='{{ url_for("static", filename="assets/images/"
+                                + ("up_arrow_green.png" if
+                                key.name in current_user_votes and current_user_votes[key.name] == score.thing_name
+                                else "up_arrow_white.png")
+                                ) }}'
+                            width="10" height="10" class="upvote_img">
+                        </button>
+                    </li>
+                    {% endfor %}
+                </ol>
+            </article>
+        {% endfor %}
+    {% else %}
+        <p>No categories found.</p>
+    {% endif %}
+{% endblock %}

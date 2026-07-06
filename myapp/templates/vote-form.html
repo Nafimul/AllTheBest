@@ -1,0 +1,6 @@
+{% extends 'base.html' %}
+{% from 'partials/vote-form.html' import render_vote_form %}
+{% block title %}Vote{% endblock %}
+{% block content %}
+    {{ render_vote_form(None, None, None) }}
+{% endblock %}
