@@ -1,4 +1,5 @@
 import { sendFormToApi } from "./api.js";
+import { addSearchability } from "./search.js";
 import { addFromThingInput, removeEmptyFromThingNames, submitVoteForm } from "./form-helpers.js";
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -86,6 +87,7 @@ document.addEventListener('DOMContentLoaded', () => {
             updatePreview(file);
         });
 
+        addSearchability(form);
         formsContainer.appendChild(form);
         return form;
     }
