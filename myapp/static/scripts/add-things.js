@@ -67,13 +67,11 @@ document.addEventListener('DOMContentLoaded', () => {
             fileInput.files = dt.files;
 
             preview.src = URL.createObjectURL(file);
-            preview.style.display = "block";
         }
 
         if (imageFile) {
             updatePreview(imageFile);
         } else {
-            preview.style.display = "none";
         }
 
         form.addEventListener("submit", submitVoteForm);
