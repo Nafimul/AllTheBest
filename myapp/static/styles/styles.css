@@ -344,7 +344,7 @@ li.favorite {
 .vote-detail-image {
     display: block;
     width: 100%;
-    max-height: 220px;
+    max-height: 440px;
     object-fit: cover;
     border-radius: 16px;
     margin-bottom: 0.8rem;
