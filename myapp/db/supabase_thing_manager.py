@@ -84,7 +84,7 @@ class SupabaseThingManager:
             row_json = thing.to_json()
             row_json.pop("created_at", None)
             # don't override image if no new image being posted
-            if img_file is None:
+            if img_file is None or not img_file.filename:
                 row_json.pop("img_path")
 
             response = self.supabase.table("things").upsert(row_json).execute()
