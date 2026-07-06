@@ -211,7 +211,7 @@ def create_app(env: str = "development") -> Flask:
         )
 
     @app.route("/vote-form")
-    # @login_required
+    @login_required
     def vote_form() -> str:
         """Render the vote submission form."""
         return render_template("vote-form.html")
@@ -306,12 +306,13 @@ def create_app(env: str = "development") -> Flask:
         )
 
     @app.route("/add-things")
+    @login_required
     def add_things() -> str:
         """Render the thing submission page."""
         return render_template("add-things.html")
 
     @app.route("/api/category", methods=["POST"])
-    # @login_required
+    @login_required
     def upsert_category() -> tuple[dict, int]:
         """Create or update a category from request data."""
         category = Category.from_request(request)
@@ -336,7 +337,7 @@ def create_app(env: str = "development") -> Flask:
         return {"message": "Successfully deleted!"}, 200
 
     @app.route("/api/thing", methods=["POST"])
-    # @login_required
+    @login_required
     def upsert_thing() -> tuple[dict, int]:
         """Create or update a thing with optional image upload."""
         img_file = request.files.get("thingImage")
@@ -393,15 +394,10 @@ def create_app(env: str = "development") -> Flask:
         return render_template("signup.html")
 
     @app.route("/profile", methods=["GET"])
+    @login_required
     def profile() -> str:
         """Render the current user's profile with their vote history."""
-        profile_votes = []
-        if current_user.is_authenticated:
-            return profile_by_id(current_user.id)
-
-        return render_template(
-            "login.html",
-        )
+        return profile_by_id(current_user.id)
 
     @app.route("/profile/<string:id>", methods=["GET"])
     def profile_by_id(id: str) -> str:
