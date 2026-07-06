@@ -56,20 +56,16 @@
             <h3> Category </h3>
             <label for="categoryName"> Name </label>
             <select name="categoryNamePrefix" id="categoryNamePrefix">
-                <option value="FAVORITE"
-                    {% if category_prefix == "FAVORITE" %}selected{% endif %}>
+                <option value="FAVORITE">
                     FAVORITE
                 </option>
-                <option value="LEAST FAVORITE"
-                    {% if category_prefix == "LEAST FAVORITE" %}selected{% endif %}>
+                <option value="LEAST FAVORITE">
                     LEAST FAVORITE
                 </option>
-                <option value="MOST"
-                    {% if category_prefix == "MOST" %}selected{% endif %}>
+                <option value="MOST">
                     MOST
                 </option>
-                <option value="LEAST"
-                    {% if category_prefix == "LEAST" %}selected{% endif %}>
+                <option value="LEAST">
                     LEAST
                 </option>
                 <option value="">
@@ -83,7 +79,7 @@
                     name="categoryName"
                     placeholder="identity reveal"
                     autocomplete="off"
-                    value="{{ category_name_without_prefix }}"
+                    value="{{ category.name }}"
                 >
                 <div class="search-suggestions" role="listbox"></div>
             </div>
