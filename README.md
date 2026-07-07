@@ -13,3 +13,5 @@ Each item gets it's own page that shows all of the categories that it won and go
 When adding categories or items, it suggests similar things and suggests autofills to make sure that there is minimal duplication
 Users can manually add aliases to items and categories, thereby merging them, so if there ever is duplication, it just means there are 2 names for 1 thing
 There is a home page with trending categories and categories where one vote is left to change the final ranking
+
+it's cool
