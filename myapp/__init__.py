@@ -60,7 +60,7 @@ def build_current_user_votes(votes: list[Vote]) -> dict[str, str]:
 def create_app(env: str = "development") -> Flask:
     load_dotenv()
     app = Flask(__name__)
-    app.secret_key = secrets.token_hex(16)  # This is necessary for flash!
+    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
     app.config.from_file(f"{env}.json", load=json.load)
     app.config.from_prefixed_env()
     app.app_context().push()
