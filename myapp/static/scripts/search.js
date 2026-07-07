@@ -10,19 +10,13 @@ export function addSearchability(searchEl) {
     const globalsearchForm = document.getElementById("globalSearchForm");
 
     async function autofillThingForm(thingName) {
-        console.log("here");
         const imagePreview = searchEl.querySelector(".imagePreview");
         const thingJson = await getThingJson(thingName);
         if (!thingJson)
             return;
-        console.log(thingJson);
 
         if (thingJson["img_path"])
             imagePreview.src = thingJson["img_path"];
-            console.log("wow");
-            console.log(imagePreview.src);
-
-
     }
 
     async function autofillCategoryForm(categoryName) {

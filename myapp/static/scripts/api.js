@@ -25,8 +25,7 @@ export async function postVote(categoryName, thingName)
 
 export async function getThingJson(thingName)
 {
-    console.log("getThing");
-    try {
+f     try {
         const response = await fetch("/api/thing/" + encodeURIComponent(thingName),
                                     {
                                         method: "GET",

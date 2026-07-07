@@ -87,7 +87,6 @@ class SupabaseScoreManager:
 
             things_with_votes: Dict[str, List[Dict[str:str]]] = {}
             for row in response.data:
-                print(row)
                 if row["thing_name"] not in things_with_votes:
                     things_with_votes[row["thing_name"]] = []
                 things_with_votes[row["thing_name"]].append(row)
