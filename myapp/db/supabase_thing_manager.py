@@ -10,9 +10,8 @@ from myapp.models.thing import Thing
 
 
 class SupabaseThingManager:
-    def __init__(self, supabase: Any) -> None:
-        """Create a thing manager for Supabase operations."""
-        self.supabase = supabase
+    def __init__(self, get_supabase_client_fn: Any) -> None:
+        self.get_supabase = get_supabase_client_fn
 
     def get_thing(self, name: str) -> Optional[Thing]:
         """Return a Thing by name or None if not found."""
@@ -23,7 +22,7 @@ class SupabaseThingManager:
 
         try:
             response = (
-                self.supabase.table("things")
+                self.get_supabase().table("things")
                 .select("*")
                 .filter("name", "eq", name)
                 .execute()
@@ -37,7 +36,7 @@ class SupabaseThingManager:
     def get_things(self) -> List[Thing]:
         """Return all things stored in Supabase."""
         try:
-            response = self.supabase.table("things").select("*").execute()
+            response = self.get_supabase().table("things").select("*").execute()
             things = []
             for item in response.data:
                 things.append(Thing.from_json(item))
@@ -54,7 +53,7 @@ class SupabaseThingManager:
         try:
             for from_thing_name in from_thing_names:
                 response = (
-                    self.supabase.table("from_things")
+                    self.get_supabase().table("from_things")
                     .upsert(
                         {
                             "thing_name": thing_name,
@@ -87,7 +86,7 @@ class SupabaseThingManager:
             if img_file is None or not img_file.filename:
                 row_json.pop("img_path")
 
-            response = self.supabase.table("things").upsert(row_json).execute()
+            response = self.get_supabase().table("things").upsert(row_json).execute()
             return Thing.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
@@ -134,7 +133,7 @@ class SupabaseThingManager:
         """Upload a validated and resized image to Supabase storage."""
         image_bytes = self._prepare_image_bytes(img_file)
         try:
-            self.supabase.storage.from_("ThingImages").upload(
+            self.get_supabase().storage.from_("ThingImages").upload(
                 file=image_bytes,
                 path=img_file.filename,
                 file_options={
@@ -154,7 +153,7 @@ class SupabaseThingManager:
 
         try:
             image_url = (
-                self.supabase.storage.from_("ThingImages").get_public_url(img_filename)
+                self.get_supabase().storage.from_("ThingImages").get_public_url(img_filename)
                 + ".JPEG"
             )
             return image_url
@@ -163,7 +162,7 @@ class SupabaseThingManager:
 
     def get_thing_and_descendant_names(self, thing_name) -> List[str]:
         try:
-            response = self.supabase.rpc(
+            response = self.get_supabase().rpc(
                 "get_thing_descendants_names",
                 {"start_thing_name": thing_name},
             ).execute()
@@ -183,7 +182,7 @@ class SupabaseThingManager:
 
         try:
             response = (
-                self.supabase.table("from_things")
+                self.get_supabase().table("from_things")
                 .select("*")
                 .filter("from_thing_name", "eq", parent_name)
                 .execute()
@@ -201,7 +200,7 @@ class SupabaseThingManager:
 
         try:
             response = (
-                self.supabase.table("from_things")
+                self.get_supabase().table("from_things")
                 .select("from_thing_name")
                 .filter("thing_name", "eq", thing_name)
                 .execute()
@@ -220,7 +219,7 @@ class SupabaseThingManager:
         self, search_text: str, max_things: int = 3, min_similarity: float = 0.1
     ):
         try:
-            response = self.supabase.rpc(
+            response = self.get_supabase().rpc(
                 "search_things",
                 {
                     "search_text": search_text,

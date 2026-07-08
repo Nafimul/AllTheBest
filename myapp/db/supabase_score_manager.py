@@ -7,14 +7,13 @@ from myapp.models.vote import Vote
 
 
 class SupabaseScoreManager:
-    def __init__(self, supabase: Any) -> None:
-        """Manage category CRUD operations in Supabase."""
-        self.supabase = supabase
+    def __init__(self, get_supabase_client_fn: Any) -> None:
+        self.get_supabase = get_supabase_client_fn
 
     def get_all(self) -> List[Score]:
         """Return all scores stored in Supabase."""
         try:
-            response = self.supabase.table("scores").select("*").execute()
+            response = self.get_supabase().table("scores").select("*").execute()
             scores = []
             for item in response.data:
                 scores.append(Score.from_json(item))
@@ -26,7 +25,7 @@ class SupabaseScoreManager:
         """Return score with given thing_name."""
         try:
             response = (
-                self.supabase.table("scores")
+                self.get_supabase().table("scores")
                 .select("*")
                 .filter("thing_name", "eq", thing_name)
                 .execute()
@@ -41,7 +40,7 @@ class SupabaseScoreManager:
     def get_by_things(self, thing_names: List[str]) -> List[Score]:
         try:
             response = (
-                self.supabase.table("scores")
+                self.get_supabase().table("scores")
                 .select("*")
                 .in_("thing_name", thing_names)
                 .execute()
@@ -79,7 +78,7 @@ class SupabaseScoreManager:
     def get_things_with_votes(self, user_id: str):
         try:
             response = (
-                self.supabase.from_("v_things_with_votes")
+                self.get_supabase().from_("v_things_with_votes")
                 .select("*")
                 .eq("user_id", user_id)
                 .execute()

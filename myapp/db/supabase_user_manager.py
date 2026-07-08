@@ -9,9 +9,9 @@ from myapp.models.user import User
 
 
 class SupabaseUserManager:
-    def __init__(self, supabase: Any) -> None:
+    def __init__(self, get_supabase_client_fn: Any) -> None:
         """Manage Supabase authentication operations."""
-        self.supabase = supabase
+        self.get_supabase = get_supabase_client_fn
 
     def signup(self, email: str, password: str, name: str) -> User:
         """Register a new user with email, password, and name."""
@@ -29,7 +29,7 @@ class SupabaseUserManager:
             raise ValueError("name is required")
 
         try:
-            response = self.supabase.auth.sign_up(
+            response = self.get_supabase().auth.sign_up(
                 {
                     "email": email,
                     "password": password,
@@ -55,7 +55,7 @@ class SupabaseUserManager:
             raise ValueError("password is required")
 
         try:
-            response = self.supabase.auth.sign_in_with_password(
+            response = self.get_supabase().auth.sign_in_with_password(
                 {"email": email, "password": password}
             )
             data = response.model_dump()
@@ -68,7 +68,7 @@ class SupabaseUserManager:
     def get_user(self) -> Optional[User]:
         """Return the currently authenticated user, or None if not available."""
         try:
-            response = self.supabase.auth.get_user()
+            response = self.get_supabase().auth.get_user()
             if response is None or response.user is None:
                 return None
 
@@ -84,7 +84,8 @@ class SupabaseUserManager:
 
         try:
             response = (
-                self.supabase.table("profiles")
+                self.get_supabase()
+                .table("profiles")
                 .select("*")
                 .filter("user_id", "eq", user_id)
                 .execute()
@@ -98,7 +99,7 @@ class SupabaseUserManager:
     def get_profiles(self) -> List[Profile]:
         """Return all things stored in Supabase."""
         try:
-            response = self.supabase.table("profiles").select("*").execute()
+            response = self.get_supabase().table("profiles").select("*").execute()
             items = []
             for item in response.data:
                 items.append(Profile.from_json(item))

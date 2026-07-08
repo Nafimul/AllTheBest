@@ -6,14 +6,13 @@ from myapp.models.score import Score
 
 
 class SupabaseCategoryManager:
-    def __init__(self, supabase: Any) -> None:
-        """Manage category CRUD operations in Supabase."""
-        self.supabase = supabase
+    def __init__(self, get_supabase_client_fn: Any) -> None:
+        self.get_supabase = get_supabase_client_fn
 
     def get_categories(self) -> List[Category]:
         """Return all categories stored in Supabase."""
         try:
-            response = self.supabase.table("categories").select("*").execute()
+            response = self.get_supabase().table("categories").select("*").execute()
             categories = []
             for item in response.data:
                 categories.append(Category.from_json(item))
@@ -28,7 +27,7 @@ class SupabaseCategoryManager:
 
         try:
             response = (
-                self.supabase.table("categories")
+                self.get_supabase().table("categories")
                 .select("*")
                 .filter("name", "eq", name)
                 .execute()
@@ -49,7 +48,7 @@ class SupabaseCategoryManager:
         try:
             row_json = category.to_json()
             row_json.pop("created_at", None)
-            response = self.supabase.table("categories").upsert(row_json).execute()
+            response = self.get_supabase().table("categories").upsert(row_json).execute()
             if not response.data:
                 raise ConnectionError("Category upsert did not return data")
             return Category.from_json(response.data[0])
@@ -60,7 +59,7 @@ class SupabaseCategoryManager:
         self, search_text: str, max_things: int = 3, min_similarity: float = 0.1
     ):
         try:
-            response = self.supabase.rpc(
+            response = self.get_supabase().rpc(
                 "search_categories",
                 {
                     "search_text": search_text,

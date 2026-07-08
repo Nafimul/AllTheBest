@@ -3,7 +3,7 @@ import os
 import uuid
 from typing import Any, Dict, List, Optional
 
-from flask import Flask, abort, flash, json, render_template, request
+from flask import Flask, abort, flash, g, json, render_template, request
 from dotenv import load_dotenv
 import httpx
 from supabase import create_client
@@ -70,14 +70,20 @@ def create_app(env: str = "development") -> Flask:
     login_manager.login_view = "login"
     login_manager.login_message = "You must be logged in to do that."
 
-    supabase_client = create_client(
-        os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
-    )
-    user_manager = SupabaseUserManager(supabase_client)
-    thing_manager = SupabaseThingManager(supabase_client)
-    category_manager = SupabaseCategoryManager(supabase_client)
-    vote_manager = SupabaseVoteManager(supabase_client)
-    score_manager = SupabaseScoreManager(supabase_client)
+    # 1. This function ensures a fresh, clean client for EVERY single request
+    def get_supabase_client():
+        if "supabase" not in g:
+            # Create a completely isolated client instance for this specific request
+            g.supabase = create_client(
+                os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
+            )
+        return g.supabase
+    
+    user_manager = SupabaseUserManager(get_supabase_client)
+    thing_manager = SupabaseThingManager(get_supabase_client)
+    category_manager = SupabaseCategoryManager(get_supabase_client)
+    vote_manager = SupabaseVoteManager(get_supabase_client)
+    score_manager = SupabaseScoreManager(get_supabase_client)
 
     def get_current_user_votes():
         current_user_votes = {}

@@ -7,14 +7,13 @@ from myapp.models.vote import Vote
 
 
 class SupabaseVoteManager:
-    def __init__(self, supabase: Any) -> None:
-        """Manage vote CRUD operations in Supabase."""
-        self.supabase = supabase
+    def __init__(self, get_supabase_client_fn: Any) -> None:
+        self.get_supabase = get_supabase_client_fn
 
     def get_all(self) -> List[Vote]:
         """Return all votes stored in Supabase."""
         try:
-            response = self.supabase.table("votes").select("*").execute()
+            response = self.get_supabase().table("votes").select("*").execute()
             items = []
             for item in response.data:
                 items.append(Vote.from_json(item))
@@ -25,7 +24,8 @@ class SupabaseVoteManager:
     def get_by_user_id(self, user_id) -> List[Vote]:
         try:
             response = (
-                self.supabase.table("votes")
+                self.get_supabase()
+                .table("votes")
                 .select("*")
                 .filter("user_id", "eq", user_id)
                 .execute()
@@ -43,7 +43,8 @@ class SupabaseVoteManager:
         """Return a specific vote by user_id, category_name, and thing_name."""
         try:
             response = (
-                self.supabase.table("votes")
+                self.get_supabase()
+                .table("votes")
                 .select("*")
                 .filter("user_id", "eq", user_id)
                 .filter("category_name", "eq", category_name)
@@ -66,11 +67,12 @@ class SupabaseVoteManager:
         try:
             row_json = vote.to_json()
             row_json.pop("created_at", None)
-            response = self.supabase.table("votes").upsert(row_json).execute()
+            response = self.get_supabase().table("votes").upsert(row_json).execute()
             if not response.data:
                 raise ConnectionError("Vote upsert did not return data")
             response = (
-                self.supabase.table("scores")
+                self.get_supabase()
+                .table("scores")
                 .update({"spoiler_for": spoiler_for})
                 .eq("category_name", vote.category_name)
                 .eq("thing_name", vote.thing_name)
@@ -91,7 +93,8 @@ class SupabaseVoteManager:
 
         try:
             response = (
-                self.supabase.table("votes")
+                self.get_supabase()
+                .table("votes")
                 .delete()
                 .filter("category_name", "eq", vote.category_name)
                 .filter("user_id", "eq", vote.user_id)
