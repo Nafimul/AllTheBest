@@ -3,7 +3,18 @@ import os
 import uuid
 from typing import Any, Dict, List, Optional
 
-from flask import Flask, abort, flash, g, json, render_template, request
+from flask import (
+    Flask,
+    abort,
+    flash,
+    json,
+    render_template,
+    request,
+    redirect,
+    url_for,
+    make_response,
+    g,
+)
 from dotenv import load_dotenv
 import httpx
 from supabase import create_client
@@ -60,7 +71,7 @@ def build_current_user_votes(votes: list[Vote]) -> dict[str, str]:
 def create_app(env: str = "development") -> Flask:
     load_dotenv()
     app = Flask(__name__)
-    app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
+    app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(16))
     app.config.from_file(f"{env}.json", load=json.load)
     app.config.from_prefixed_env()
     app.app_context().push()
@@ -70,15 +81,16 @@ def create_app(env: str = "development") -> Flask:
     login_manager.login_view = "login"
     login_manager.login_message = "You must be logged in to do that."
 
-    # 1. This function ensures a fresh, clean client for EVERY single request
+    SUPABASE_URL = os.environ.get("SUPABASE_URL")
+    SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+
+    # Dynamic provider ensuring a perfectly unique context environment per HTTP call
     def get_supabase_client():
         if "supabase" not in g:
-            # Create a completely isolated client instance for this specific request
-            g.supabase = create_client(
-                os.environ.get("SUPABASE_URL"), os.environ.get("SUPABASE_KEY")
-            )
+            g.supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
         return g.supabase
-    
+
+    # Seed all managers with the request-scoped provider helper
     user_manager = SupabaseUserManager(get_supabase_client)
     thing_manager = SupabaseThingManager(get_supabase_client)
     category_manager = SupabaseCategoryManager(get_supabase_client)
@@ -362,7 +374,7 @@ def create_app(env: str = "development") -> Flask:
         return {"message": "Success!"}, 200
 
     @app.route("/login", methods=["POST"])
-    def login() -> str:
+    def login() -> Any:
         """Handle login form submission and render results."""
         try:
             email = request.form.get("email")
@@ -370,8 +382,27 @@ def create_app(env: str = "development") -> Flask:
             user = user_manager.login(email, password)
             login_user(user)
 
+            response = make_response(render_template("home.html"))
             flash("Logged in successfully")
-            return render_template("home.html")
+
+            # Extract generated token sessions from the dynamic request-scoped client
+            session = get_supabase_client().auth.get_session()
+            if session:
+                response.set_cookie(
+                    "sb-access-token",
+                    session.access_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Lax",
+                )
+                response.set_cookie(
+                    "sb-refresh-token",
+                    session.refresh_token,
+                    httponly=True,
+                    secure=True,
+                    samesite="Lax",
+                )
+            return response
         except (AuthenticationError, TypeError, ValueError) as e:
             flash(str(e))
             return render_template("login.html")
@@ -381,16 +412,30 @@ def create_app(env: str = "development") -> Flask:
         return render_template("login.html")
 
     @app.route("/signup", methods=["POST"])
-    def signup() -> str:
+    def signup() -> Any:
         """Handle signup form submission and render the signup page."""
         try:
             email = request.form.get("email")
             password = request.form.get("password")
             name = request.form.get("name")
             user_manager.signup(email, password, name)
-            user_manager.login(email, password)
+            user = user_manager.login(email, password)
+            login_user(user)
+            
+            response = make_response(render_template("signup.html"))
             flash("Signup successful. You are now logged in.")
-            return render_template("signup.html")
+
+            session = get_supabase_client().auth.get_session()
+            if session:  # <--- CHANGED THIS LINE
+                response.set_cookie(
+                    "sb-access-token", session.access_token,  # <--- CHANGED THIS LINE
+                    httponly=True, secure=True, samesite="Lax"
+                )
+                response.set_cookie(
+                    "sb-refresh-token", session.refresh_token,  # <--- CHANGED THIS LINE
+                    httponly=True, secure=True, samesite="Lax"
+                )
+            return response
         except AuthenticationError as e:
             flash(str(e))
             return render_template("signup.html")
