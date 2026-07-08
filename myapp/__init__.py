@@ -135,7 +135,9 @@ def create_app(env: str = "development") -> Flask:
     @login_manager.user_loader
     def user_loader(id: str) -> Optional[User]:
         """Load a user from the authentication backend."""
-        return user_manager.get_user()
+        # BEFORE: return user_manager.get_user()
+        # AFTER:
+        return user_manager.get_user_by_id(id)
 
     @app.route("/categories")
     def list_categories() -> str:
@@ -421,19 +423,25 @@ def create_app(env: str = "development") -> Flask:
             user_manager.signup(email, password, name)
             user = user_manager.login(email, password)
             login_user(user)
-            
+
             response = make_response(render_template("signup.html"))
             flash("Signup successful. You are now logged in.")
 
             session = get_supabase_client().auth.get_session()
             if session:  # <--- CHANGED THIS LINE
                 response.set_cookie(
-                    "sb-access-token", session.access_token,  # <--- CHANGED THIS LINE
-                    httponly=True, secure=True, samesite="Lax"
+                    "sb-access-token",
+                    session.access_token,  # <--- CHANGED THIS LINE
+                    httponly=True,
+                    secure=True,
+                    samesite="Lax",
                 )
                 response.set_cookie(
-                    "sb-refresh-token", session.refresh_token,  # <--- CHANGED THIS LINE
-                    httponly=True, secure=True, samesite="Lax"
+                    "sb-refresh-token",
+                    session.refresh_token,  # <--- CHANGED THIS LINE
+                    httponly=True,
+                    secure=True,
+                    samesite="Lax",
                 )
             return response
         except AuthenticationError as e:

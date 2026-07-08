@@ -92,7 +92,7 @@ class SupabaseUserManager:
         except Exception:
             return None
 
-    def get_profile_by_id(self, user_id: str) -> Optional[User]:
+    def get_profile_by_id(self, user_id: str) -> Optional[Profile]:
         """Return a profile by their ID, or None if not found."""
         if not isinstance(user_id, str):
             raise TypeError("user_id must be a string")
@@ -109,6 +109,13 @@ class SupabaseUserManager:
             return Profile.from_json(response.data[0])
         except httpx.HTTPError as e:
             raise ConnectionError(str(e)) from e
+
+    def get_user_by_id(self, user_id: str) -> Optional[User]:
+        """only actually has profile fields"""
+        profile = self.get_profile_by_id(user_id)
+        if not profile:
+            return None
+        return User(user_id, profile.name)
 
     def get_profiles(self) -> List[Profile]:
         """Return all things stored in Supabase."""
