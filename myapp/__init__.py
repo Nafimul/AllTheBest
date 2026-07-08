@@ -355,7 +355,7 @@ def create_app(env: str = "development") -> Flask:
         )
         return {"message": "Success!"}, 200
 
-    @app.route("/login", methods=["GET", "POST"])
+    @app.route("/login", methods=["POST"])
     def login() -> str:
         """Handle login form submission and render results."""
         try:
