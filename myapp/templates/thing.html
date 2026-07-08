@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% from 'partials/vote-form.html' import render_vote_form %}
-{% block title %}thing.name{% endblock %}
+{% block title %} {{ thing.name }} {% endblock %}
 {% block file_links %}
     <script type='module' src='{{ url_for("static", filename="scripts/upvote.js") }}'></script>
 {% endblock %}
