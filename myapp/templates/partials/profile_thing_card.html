@@ -30,7 +30,7 @@
             {% else %}
               <a href="{{ url_for('show_category', name=vote.category_name) }}">{{ vote.category_name }}</a>
             {% endif %}
-            <a href="{{ url_for('show_vote', thing_name=thing_name, category_name=vote.category_name, user_id=user_id) }}"> details</a>
+            <a href="{{ url_for('show_vote', thing_name=thing_name, category_name=vote.category_name, user_id=user_id) }}" id="details-link"> details</a>
 
             <button class="upvote_button" data-category="{{ vote.category_name }}" data-thing="{{ thing_name }}">
               <img
