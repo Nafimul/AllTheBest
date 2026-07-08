@@ -17,7 +17,7 @@ from flask import (
 )
 from dotenv import load_dotenv
 import httpx
-from supabase import create_client
+from supabase import ClientOptions, create_client
 
 from myapp.db.supabase_category_manager import SupabaseCategoryManager
 from myapp.db.supabase_score_manager import SupabaseScoreManager
@@ -84,10 +84,13 @@ def create_app(env: str = "development") -> Flask:
     SUPABASE_URL = os.environ.get("SUPABASE_URL")
     SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
-    # Dynamic provider ensuring a perfectly unique context environment per HTTP call
     def get_supabase_client():
-        if "supabase" not in g:
-            g.supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
+        if 'supabase' not in g:
+            isolated_options = ClientOptions(
+                persist_session=False,
+                auto_refresh_token=False
+            )
+            g.supabase = create_client(SUPABASE_URL, SUPABASE_KEY, options=isolated_options)
         return g.supabase
 
     # Seed all managers with the request-scoped provider helper
