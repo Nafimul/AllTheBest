@@ -74,7 +74,6 @@ def create_app(env: str = "development") -> Flask:
     app.secret_key = os.environ.get("SECRET_KEY", secrets.token_hex(16))
     app.config.from_file(f"{env}.json", load=json.load)
     app.config.from_prefixed_env()
-    app.app_context().push()
 
     login_manager = LoginManager()
     login_manager.init_app(app)
@@ -85,12 +84,13 @@ def create_app(env: str = "development") -> Flask:
     SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
     def get_supabase_client():
-        if 'supabase' not in g:
+        if "supabase" not in g:
             isolated_options = ClientOptions(
-                persist_session=False,
-                auto_refresh_token=False
+                persist_session=False, auto_refresh_token=False
             )
-            g.supabase = create_client(SUPABASE_URL, SUPABASE_KEY, options=isolated_options)
+            g.supabase = create_client(
+                SUPABASE_URL, SUPABASE_KEY, options=isolated_options
+            )
         return g.supabase
 
     # Seed all managers with the request-scoped provider helper
