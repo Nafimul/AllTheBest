@@ -31,9 +31,17 @@
                 <div class="relatedFormItems">
                     <label>
                         From
-                        <div class="from-things">
-                            <button type="button" class="add-from-thing-button">Add From Thing</button>
-                            <input name="fromThingNames" type="text" placeholder="Star Wars">
+                        <div class="search-el">
+                            <div class="search-input-wrapper">
+                                <input
+                                    class="thing vote-input fromThing"
+                                    type="text"
+                                    name="fromThingNames"
+                                    placeholder="Star Wars"
+                                    autocomplete="off"
+                                >
+                                <div class="search-suggestions" role="listbox"></div>
+                            </div>
                         </div>
                     </label>
                 </div>
