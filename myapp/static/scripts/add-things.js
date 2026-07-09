@@ -31,6 +31,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const fromThingInput = form.querySelector("input[name='fromThingNames']");
         const addFromThingButton = form.querySelector(".add-from-thing-button");
+        const fromThingsContainer = form.querySelector("#fromThingsContainer");
+        const fromThingsearchInputWrapper = fromThingsContainer.querySelector(".search-input-wrapper");
         const fileInput = form.querySelector("input[name=thingImage]");
         const formId = `thing-form-${nextFormId++}`;
         form.dataset.formId = formId;
@@ -75,9 +77,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         form.addEventListener("submit", submitVoteForm);
-
+        
         if (addFromThingButton && fromThingInput) {
-            addFromThingButton.addEventListener("click", () => addFromThingInput(fromThingInput));
+            addFromThingButton.addEventListener("click", () => addFromThingInput(fromThingsearchInputWrapper));
         }
 
         fileInput.addEventListener("change", (event) => {
