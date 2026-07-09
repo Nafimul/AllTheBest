@@ -1,10 +1,12 @@
 import { sendFormToApi } from "./api.js";
+import { addSearchability } from "./search.js"
 
 
 export function addFromThingInput(searchInputWrapper) {
     const clone = searchInputWrapper.cloneNode(true);
     clone.value = "";
     clone.id = null;
+    addSearchability(clone);
     searchInputWrapper.parentElement.appendChild(clone);
     return clone;
 }
