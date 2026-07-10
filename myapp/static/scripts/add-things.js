@@ -63,10 +63,15 @@ document.addEventListener('DOMContentLoaded', () => {
             preview.src = URL.createObjectURL(file);
         }
 
-        if (imageFile) {
-            updatePreview(imageFile);
-        } else {
+        function setImage(file) {
+            updatePreview(file);
+            const dt = new DataTransfer();
+            dt.items.add(file);
+            fileInput.files = dt.files;
         }
+
+        if (imageFile)
+            setImage(imageFile);
 
         form.addEventListener("submit", submitVoteForm);
         
