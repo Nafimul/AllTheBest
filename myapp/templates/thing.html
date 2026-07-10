@@ -34,7 +34,7 @@
                                 <td>{{ score.ranking }}</td>
                                 <td><a href="{{ url_for('show_category', name=score.category_name) }}">{{ score.category_name }}</a></td>
                                 <td>
-                                    <a href="{{ url_for('show_thing', name=score.source_thing) }}">{{ score.thing_name }}</a>
+                                    <a href="{{ url_for('show_thing', name=score.thing_name) }}">{{ score.thing_name }}</a>
                                 </td>
                                 <td class="vote-count">{{ score.num_votes }}</td>
                                 <td>
