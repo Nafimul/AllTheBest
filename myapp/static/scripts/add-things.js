@@ -52,20 +52,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!file) {
                 attachedImages.delete(formId);
                 preview.src = "";
-                preview.style.display = "none";
-
-                const dt = new DataTransfer();
-                fileInput.files = dt.files;
-
+                fileInput.files = null;
                 return;
             }
-
             attachedImages.set(formId, file);
-
-            const dt = new DataTransfer();
-            dt.items.add(file);
-            fileInput.files = dt.files;
-
+            fileInput.files = null;
             preview.src = URL.createObjectURL(file);
         }
 

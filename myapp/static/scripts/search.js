@@ -8,15 +8,19 @@ export function addSearchability(searchEl) {
     const suggestionsBox = searchEl.querySelector('.search-suggestions');
     const searchTypeInputs = searchEl.querySelectorAll('input[name="search-type"]');
     const globalsearchForm = document.getElementById("globalSearchForm");
+    const fileInput = searchEl.querySelector("input[name=thingImage]");
 
     async function autofillThingForm(thingName) {
         const imagePreview = searchEl.querySelector(".imagePreview");
         const thingJson = await getThingJson(thingName);
         if (!thingJson)
             return;
-
+        fileInput.files = null;
+        fileInput.value = null;
         if (thingJson["img_path"])
+        {
             imagePreview.src = thingJson["img_path"];
+        }
     }
 
     async function autofillCategoryForm(categoryName) {
